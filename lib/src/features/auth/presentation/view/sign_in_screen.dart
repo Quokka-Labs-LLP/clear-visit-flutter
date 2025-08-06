@@ -1,6 +1,6 @@
-import 'package:base_architecture/src/shared/utilities/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:io' show Platform;
 
 import '../../../../shared/constants/color_constants.dart';
 import '../../../../shared/constants/image_constants.dart';
@@ -44,6 +44,15 @@ class _SignInScreenState extends State<SignInScreen> {
     context.read<AuthBloc>().add(OnToggleAuthMode());
   }
 
+  void _onContinueWithApple() {
+    context.read<AuthBloc>().add(OnAppleSignInEvent());
+
+  }
+
+  void _onContinueWithGoogle() {
+    context.read<AuthBloc>().add(OnGoogleSignInEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,13 +61,17 @@ class _SignInScreenState extends State<SignInScreen> {
         bottom: false,
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildHeader(state),
-                _buildForm(state),
-                _buildFooter(),
-              ],
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildHeader(state),
+                  const SizedBox(height: 50),
+                  _buildForm(state),
+                  const SizedBox(height: 30),
+                  _buildFooter(),
+                ],
+              ),
             );
           },
         ),
@@ -69,7 +82,6 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _buildHeader(AuthState state) {
     return Column(
       children: [
-        const SizedBox(height: 100),
         Image.asset(ImageConst.splashName, height: 100),
         const SizedBox(height: 24),
         Text(
@@ -92,7 +104,6 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 50),
       ],
     );
   }
@@ -102,28 +113,72 @@ class _SignInScreenState extends State<SignInScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          if (!state.isSignInMode) _buildInputField(
-            controller: _mobileController,
-            focusNode: _mobileFocusNode,
-            hintText: 'Enter your full name',
-            icon: Icons.person,
-            errorText: state.mobileError,
-            onChanged: _onMobileChanged,
-          ),
-          _buildInputField(
-            controller: _mobileController,
-            focusNode: _mobileFocusNode,
-            hintText: 'Enter your mobile number',
-            icon: Icons.phone,
-            errorText: state.mobileError,
-            onChanged: _onMobileChanged,
-          ),
-          if (state.mobileError != null) _buildErrorText(state.mobileError!),
-          const SizedBox(height: 29),
-          _buildSubmitButton(state),
-          const SizedBox(height: 24),
-          _buildToggleModeText(state),
+          _buildPlatformButtons(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlatformButtons() {
+    if (Platform.isIOS) {
+      // On iOS, show both Google and Apple buttons
+      return Column(
+        children: [
+          _buildGoogleButton(),
+          const SizedBox(height: 16),
+          _buildAppleButton(),
+        ],
+      );
+    } else if (Platform.isAndroid) {
+      // On Android, show only Google button
+      return _buildGoogleButton();
+    } else {
+      // Fallback for other platforms
+      return Container();
+    }
+  }
+
+  Widget _buildAppleButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton.icon(
+        onPressed: _onContinueWithApple,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+        icon: const Icon(Icons.apple, size: 24),
+        label: const Text(
+          'Continue with Apple',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGoogleButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton.icon(
+        onPressed: _onContinueWithGoogle,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.grey.shade300),
+          ),
+        ),
+        icon: const Icon(Icons.g_mobiledata, size: 24),
+        label: const Text(
+          'Continue with Google',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

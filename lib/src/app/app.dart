@@ -1,6 +1,7 @@
-import 'package:base_architecture/src/app/theme/bloc/theme_bloc.dart';
-import 'package:base_architecture/src/app/theme/bloc/theme_state.dart';
-import 'package:base_architecture/src/app/theme/theme.dart';
+
+import 'package:clearvisit/src/app/theme/bloc/theme_bloc.dart';
+import 'package:clearvisit/src/app/theme/bloc/theme_state.dart';
+import 'package:clearvisit/src/app/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

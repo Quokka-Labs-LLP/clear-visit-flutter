@@ -1,6 +1,7 @@
 
-import 'package:base_architecture/src/shared/constants/color_constants.dart';
 import 'package:flutter/material.dart';
+
+import '../../shared/constants/color_constants.dart';
 
 final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,

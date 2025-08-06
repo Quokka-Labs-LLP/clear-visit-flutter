@@ -1,9 +1,11 @@
-import 'package:base_architecture/src/shared/constants/color_constants.dart';
-import 'package:base_architecture/src/shared/constants/image_constants.dart';
-import 'package:base_architecture/src/shared/constants/route_constants.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import '../../../../shared/constants/color_constants.dart';
+import '../../../../shared/constants/image_constants.dart';
+import '../../../../shared/constants/route_constants.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

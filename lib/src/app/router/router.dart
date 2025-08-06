@@ -1,11 +1,11 @@
 
-import 'package:base_architecture/src/features/auth/presentation/view/sign_in_screen.dart';
-import 'package:base_architecture/src/shared/constants/route_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lifecycle/lifecycle.dart';
+import '../../features/auth/presentation/view/sign_in_screen.dart';
 import '../../features/splash/presentation/view/splash_screen.dart';
 
+import '../../shared/constants/route_constants.dart';
 import '../../shared/widgets/page_not_found.dart';
 
 class NavigationManager {

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../services/service_locator.dart';
@@ -10,15 +11,9 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepo _apiRepo = serviceLocator<AuthRepo>();
+  final AuthRepo _authRepo = serviceLocator<AuthRepo>();
 
   AuthBloc() : super(AuthState()) {
-    on<OnLoginEvent>((final event, final emit) async {
-      emit(state.copyWith(apiCallStatus: StateLoading()));
-      final SampleModel sampleModel = await _apiRepo.sampleApiCall();
-      /// HERE will check api status code & return data
-      emit(state.copyWith(apiCallStatus: StateLoaded(successMessage: sampleModel.message ?? ''), sampleModel: sampleModel));
-    });
 
     on<OnValidateMobileEvent>((final event, final emit) {
       final mobileNumber = event.mobileNumber.trim();
@@ -60,6 +55,36 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<OnToggleAuthMode>((final event,final emit) {
       emit(state.copyWith(isSignInMode: !state.isSignInMode));
+    });
+
+    on<OnAppleSignInEvent>((event, emit) async {
+      emit(state.copyWith(apiCallStatus: StateLoading()));
+      try {
+        await _authRepo.signInWithApple();
+        emit(state.copyWith(apiCallStatus: StateLoaded(successMessage: 'Apple Sign-In successful')));
+      } catch (e) {
+        emit(state.copyWith(apiCallStatus: StateFailed(errorMessage: 'Apple Sign-In failed: \\${e.toString()}')));
+      }
+    });
+
+    on<OnGoogleSignInEvent>((event, emit) async {
+      emit(state.copyWith(apiCallStatus: StateLoading()));
+      try {
+        final apiResult =
+        await _authRepo.signInWithGoogle();
+        apiResult.fold((error) {
+
+          debugPrint("error");
+        }, (res) {
+          debugPrint("worked");
+
+
+        });
+
+        emit(state.copyWith(apiCallStatus: StateLoaded(successMessage: 'Google Sign-In successful')));
+      } catch (e) {
+        emit(state.copyWith(apiCallStatus: StateFailed(errorMessage: 'Google Sign-In failed: \\${e.toString()}')));
+      }
     });
   }
 

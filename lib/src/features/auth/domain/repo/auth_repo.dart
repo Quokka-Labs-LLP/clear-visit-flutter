@@ -1,5 +1,6 @@
-import '../../data/model/sample_model.dart';
+import 'package:fpdart/fpdart.dart';
 
 abstract class AuthRepo {
-  Future<SampleModel> sampleApiCall(); /// We can also use Either for the return type.
+  Future<void> signInWithApple();
+  Future<Either<String, void>> signInWithGoogle();
 }

@@ -1,4 +1,4 @@
-package com.example.new_base_project
+package com.clearvisit.app
 
 import io.flutter.embedding.android.FlutterActivity
 

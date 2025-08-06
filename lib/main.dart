@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:firebase_core/firebase_core.dart';
 
+import 'firebase_options.dart';
 import 'src/app/app.dart';
 import 'src/services/db_services/db_init.dart';
 import 'src/shared/utilities/debug_logger.dart';
@@ -13,6 +15,9 @@ void main() async {
   runZonedGuarded(
     () async {
       initializeApp();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
       await DatabaseService.init();
       ///MARK: Uncomment this code and import the dependencies related to it
       // ServerLogger.initLoggerService(

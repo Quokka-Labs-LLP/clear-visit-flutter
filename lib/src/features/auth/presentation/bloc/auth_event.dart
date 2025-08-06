@@ -45,4 +45,18 @@ class OnToggleAuthMode extends AuthEvent {
   List<Object?> get props => [];
 }
 
+class OnAppleSignInEvent extends AuthEvent {
+  const OnAppleSignInEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class OnGoogleSignInEvent extends AuthEvent {
+  const OnGoogleSignInEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
 
