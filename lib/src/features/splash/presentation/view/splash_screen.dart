@@ -1,9 +1,10 @@
 import 'package:base_architecture/src/shared/constants/color_constants.dart';
 import 'package:base_architecture/src/shared/constants/image_constants.dart';
-import 'package:base_architecture/src/shared/constants/route_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import '../../../../app/router/route_const.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,10 +20,15 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _loadVersion();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      context.goNamed(RouteConst.signInScreen);
-    },);
+    _navigateAfterDelay();
 
+  }
+
+  void _navigateAfterDelay() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      context.goNamed(RouteConst.start);
+    }
   }
 
   Future<void> _loadVersion() async {
@@ -33,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _onPressStart() {
-    context.goNamed(RouteConst.signInScreen);
+    context.goNamed(RouteConst.loginPage);
   }
   @override
   Widget build(BuildContext context) {

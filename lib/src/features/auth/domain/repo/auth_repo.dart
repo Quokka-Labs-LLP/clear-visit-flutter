@@ -1,5 +1,9 @@
-import '../../data/model/sample_model.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 abstract class AuthRepo {
-  Future<SampleModel> sampleApiCall(); /// We can also use Either for the return type.
+  Future<void> signInWithApple();
+  Future<Either<String, GoogleSignInAccount>> signInWithGoogle();
+  Future<Either<String, String>> setUsername({required String username});
+  Future<void> signOut();
 }

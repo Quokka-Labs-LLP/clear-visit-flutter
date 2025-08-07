@@ -7,6 +7,11 @@ class AuthState {
   final bool isMobileValid;
   final String? mobileError;
   final bool isSignInMode;
+  final StateStatus signInStatus;
+  final String? name;
+  final StateStatus setNameStatus;
+  final StateStatus logoutStatus;
+
 
   AuthState({
     this.apiCallStatus = const StateNotLoaded(),
@@ -15,6 +20,10 @@ class AuthState {
     this.isMobileValid = false,
     this.mobileError,
     this.isSignInMode = true,
+    this.name,
+    this.signInStatus = const StateNotLoaded(),
+    this.setNameStatus = const StateNotLoaded(),
+    this.logoutStatus = const StateNotLoaded(),
   });
 
   AuthState copyWith({
@@ -24,6 +33,10 @@ class AuthState {
     final bool? isMobileValid,
     final String? mobileError,
     final bool? isSignInMode,
+    final StateStatus? signInStatus,
+    final String? name,
+    final StateStatus? setNameStatus,
+    final StateStatus? logoutStatus,
   }) => AuthState(
     apiCallStatus: apiCallStatus ?? this.apiCallStatus,
     sampleModel: sampleModel ?? this.sampleModel,
@@ -31,5 +44,9 @@ class AuthState {
     isMobileValid: isMobileValid ?? this.isMobileValid,
     mobileError: mobileError,
     isSignInMode: isSignInMode ?? this.isSignInMode,
+    signInStatus: signInStatus ?? this.signInStatus,
+    name: name ?? this.name,
+    setNameStatus: setNameStatus ?? this.setNameStatus,
+    logoutStatus: logoutStatus ?? this.logoutStatus,
   );
 }

@@ -13,7 +13,7 @@ class OnLoginEvent extends AuthEvent{
 
 class OnMobileSignInEvent extends AuthEvent {
   final String mobileNumber;
-  
+
   const OnMobileSignInEvent({required this.mobileNumber});
 
   @override
@@ -22,7 +22,7 @@ class OnMobileSignInEvent extends AuthEvent {
 
 class OnSignUpEvent extends AuthEvent {
   final String mobileNumber;
-  
+
   const OnSignUpEvent({required this.mobileNumber});
 
   @override
@@ -31,11 +31,20 @@ class OnSignUpEvent extends AuthEvent {
 
 class OnValidateMobileEvent extends AuthEvent {
   final String mobileNumber;
-  
+
   const OnValidateMobileEvent({required this.mobileNumber});
 
   @override
   List<Object?> get props => [mobileNumber];
+}
+
+class OnNameSubmitted extends AuthEvent {
+  final String name;
+
+  const OnNameSubmitted({required this.name});
+
+  @override
+  List<Object?> get props => [name];
 }
 class OnToggleAuthMode extends AuthEvent {
 
@@ -45,4 +54,22 @@ class OnToggleAuthMode extends AuthEvent {
   List<Object?> get props => [];
 }
 
+class OnAppleSignInEvent extends AuthEvent {
+  const OnAppleSignInEvent();
 
+  @override
+  List<Object?> get props => [];
+}
+
+class OnGoogleSignInEvent extends AuthEvent {
+  const OnGoogleSignInEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+class OnLogout extends AuthEvent {
+  const OnLogout();
+
+  @override
+  List<Object?> get props => [];
+}

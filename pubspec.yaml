@@ -14,16 +14,19 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  another_flushbar: ^1.12.30
   cupertino_icons: ^1.0.8
+  cloud_firestore: ^6.0.0
   dio: ^5.1.2
   shared_preferences: ^2.0.15
   fluttertoast: ^8.1.2
   flutter_svg: ^2.2.0
   lifecycle: ^0.10.0
   flutter_bloc: ^9.1.1
+  fpdart: ^1.1.1
   get_it: ^8.0.3
   equatable: ^2.0.5
-  go_router: ^15.2.4
+  go_router: any
   lottie: ^3.3.1
   flutter_dotenv: ^5.0.2
   connectivity_plus: ^6.1.4
@@ -34,7 +37,11 @@ dependencies:
   path_provider: ^2.0.15
   flutter_email_sender: ^7.0.0
   ql_logger_flutter: ^0.0.5
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.0
   logger: ^2.6.0
+  google_sign_in: ^7.1.1
+
 
 dev_dependencies:
   flutter_test:
