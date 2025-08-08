@@ -8,10 +8,11 @@ class AuthState {
   final String? mobileError;
   final bool isSignInMode;
   final StateStatus signInStatus;
+  final StateStatus appleSignInStatus;
+  final StateStatus googleSignInStatus;
   final String? name;
   final StateStatus setNameStatus;
   final StateStatus logoutStatus;
-
 
   AuthState({
     this.apiCallStatus = const StateNotLoaded(),
@@ -22,6 +23,8 @@ class AuthState {
     this.isSignInMode = true,
     this.name,
     this.signInStatus = const StateNotLoaded(),
+    this.appleSignInStatus = const StateNotLoaded(),
+    this.googleSignInStatus = const StateNotLoaded(),
     this.setNameStatus = const StateNotLoaded(),
     this.logoutStatus = const StateNotLoaded(),
   });
@@ -34,6 +37,8 @@ class AuthState {
     final String? mobileError,
     final bool? isSignInMode,
     final StateStatus? signInStatus,
+    final StateStatus? appleSignInStatus,
+    final StateStatus? googleSignInStatus,
     final String? name,
     final StateStatus? setNameStatus,
     final StateStatus? logoutStatus,
@@ -45,6 +50,8 @@ class AuthState {
     mobileError: mobileError,
     isSignInMode: isSignInMode ?? this.isSignInMode,
     signInStatus: signInStatus ?? this.signInStatus,
+    appleSignInStatus: appleSignInStatus ?? this.appleSignInStatus,
+    googleSignInStatus: googleSignInStatus ?? this.googleSignInStatus,
     name: name ?? this.name,
     setNameStatus: setNameStatus ?? this.setNameStatus,
     logoutStatus: logoutStatus ?? this.logoutStatus,

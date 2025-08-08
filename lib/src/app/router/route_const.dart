@@ -5,4 +5,10 @@ class RouteConst{
   static const loginPage = '/loginPage';
   static const setupProfile = '/setupProfile';
   static const addDoctorPage = '/addDoctorPage';
+  static const doctorsListingPage = '/doctorsListingPage';
+  static const onboardingSuccess = '/onboardingSuccess';
+  static const profileScreen = '/profileScreen';
+  static const recordingScreen = '/recordingScreen';
+
+
 }

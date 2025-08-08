@@ -20,27 +20,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(AuthState()) {
     on<OnNameSubmitted>((final event, final emit) async {
       final name = event.name.trim();
-      
       emit(state.copyWith(
         name: name,
-        setNameStatus: StateLoading(),
+        setNameStatus:  StateLoading(),
       ));
-      
       try {
-        final result = await _authRepo.setUsername(username: name);
-        
+        final result = await _authRepo.setUsername(username: name, fromSignUpPage: event.fromSignUpPage);
         result.fold(
           (error) {
             emit(state.copyWith(
-              setNameStatus: StateFailed(errorMessage: error),
+              setNameStatus:  StateFailed(errorMessage: error),
             ));
           },
-          (success) async {
-            // Save to shared preferences
-            final pref = serviceLocator<SharedPreferenceBaseService>();
-            await pref.setAttribute(SharedPrefKeys.name, name);
-            await pref.setAttribute(SharedPrefKeys.isOnboarded, true);
-            
+          (success) {
             emit(state.copyWith(
               setNameStatus: StateLoaded(successMessage: 'Name updated successfully'),
             ));
@@ -88,19 +80,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<OnAppleSignInEvent>((event, emit) async {
-      emit(state.copyWith(apiCallStatus: StateLoading()));
+      emit(state.copyWith(appleSignInStatus: StateLoading()));
       try {
         await _authRepo.signInWithApple();
-        emit(state.copyWith(apiCallStatus: StateLoaded(
+        emit(state.copyWith(appleSignInStatus: StateLoaded(
             successMessage: 'Apple Sign-In successful')));
       } catch (e) {
-        emit(state.copyWith(apiCallStatus: StateFailed(
+        emit(state.copyWith(appleSignInStatus: StateFailed(
             errorMessage: 'Apple Sign-In failed: \\${e.toString()}')));
       }
     });
 
     on<OnGoogleSignInEvent>((event, emit) async {
-      emit(state.copyWith(signInStatus: StateLoading()));
+      emit(state.copyWith(googleSignInStatus: StateLoading()));
 
       try {
         final apiResult = await _authRepo.signInWithGoogle();
@@ -108,7 +100,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (apiResult.isLeft()) {
           final error = apiResult.fold((l) => l, (_) => '');
           emit(state.copyWith(
-            signInStatus: StateFailed(
+            googleSignInStatus: StateFailed(
                 errorMessage: 'Google Sign-In failed: $error'),
           ));
           return;
@@ -142,10 +134,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             } else {
               await usersRef.set({
                 'name': user.displayName ?? '',
+                'email': user.email,
+                'createdAt': FieldValue.serverTimestamp(),
               });
-
               await pref.setAttribute(SharedPrefKeys.isLoggedIn, true);
-              await pref.setAttribute(SharedPrefKeys.isOnboarded, false);
             }
 
             // ✅ Always update other user info locally
@@ -157,30 +149,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             debugPrint("User signed in with Google: ${user.email}");
 
             emit(state.copyWith(
-              signInStatus: StateLoaded(
+              googleSignInStatus: StateLoaded(
                   successMessage: 'Google Sign-In successful'),
             ));
           } else {
             emit(state.copyWith(
-              signInStatus: StateFailed(
+              googleSignInStatus: StateFailed(
                   errorMessage: 'Firebase authentication failed'),
             ));
           }
         } catch (firebaseError) {
           emit(state.copyWith(
-            signInStatus: StateFailed(
+            googleSignInStatus: StateFailed(
               errorMessage: 'Firebase auth error: ${firebaseError.toString()}',
             ),
           ));
         }
       } catch (e) {
         emit(state.copyWith(
-          signInStatus: StateFailed(
+          googleSignInStatus: StateFailed(
               errorMessage: 'Unexpected error: ${e.toString()}'),
         ));
       }
     });
-
 
     on<OnLogout>((event, emit) async {
       emit(state.copyWith(logoutStatus: StateLoading()));
@@ -192,6 +183,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(state.copyWith(logoutStatus: StateFailed(
             errorMessage: 'Apple Sign-In failed: \\${e.toString()}')));
       }
+    });
+
+    on<GetUserName>((event, emit) async {
+        final sharedPref = serviceLocator<SharedPreferenceBaseService>();
+        final savedName = await sharedPref.getAttribute(SharedPrefKeys.name, '');
+        emit(state.copyWith(name: savedName));
     });
 
   }

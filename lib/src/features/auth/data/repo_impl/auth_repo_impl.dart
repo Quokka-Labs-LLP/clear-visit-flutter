@@ -10,14 +10,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../services/service_locator.dart';
 import '../../../../shared_pref_services/shared_pref_base_service.dart';
+import '../../../../shared_pref_services/shared_pref_keys.dart';
 import '../../domain/repo/auth_repo.dart';
 
 class AuthRepoImpl extends AuthRepo {
-  final Dio _dio = serviceLocator<Dio>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
   final firestore = serviceLocator<FirebaseFirestore>();
-
 
   @override
   Future<void> signInWithApple() async {
@@ -29,7 +27,7 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   @override
-  Future<Either<String, String>> setUsername({required String username}) async {
+  Future<Either<String, String>> setUsername({required String username, required bool fromSignUpPage}) async {
     try {
       final User? user = _auth.currentUser;
 
@@ -45,7 +43,11 @@ class AuthRepoImpl extends AuthRepo {
         {'name': username},
         SetOptions(merge: true), // merge = update if exists
       );
-
+      final pref = serviceLocator<SharedPreferenceBaseService>();
+      await pref.setAttribute(SharedPrefKeys.name, username);
+      if(fromSignUpPage) {
+        await pref.setAttribute(SharedPrefKeys.isOnboarded, true);
+      }
       return right(username);
     } catch (e) {
       debugPrint('Error setting username: ${e.toString()}');

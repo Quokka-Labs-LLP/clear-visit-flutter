@@ -80,13 +80,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 50,
-                width: 330,
-                child: ElevatedButton(
-                    onPressed: _onPressStart,child: Text("Get Started",style: TextStyle(color: ColorConst.white,fontWeight: FontWeight.w800,fontSize: 16),)
-                ),
-              )
             ],
           ),
         ),

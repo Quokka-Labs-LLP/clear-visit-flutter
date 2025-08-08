@@ -1,18 +1,14 @@
-import 'package:base_architecture/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_const.dart';
-import '../../../../shared/constants/color_constants.dart';
 import '../../../../shared/utilities/event_status.dart';
-import '../../../../shared/widgets/common_button.dart';
-import '../../../../shared/widgets/custom_text_field.dart';
-import '../../../../shared_pref_services/shared_pref_base_service.dart';
-import '../../../../shared_pref_services/shared_pref_keys.dart';
+import '../../../../shared/utilities/responsive _constants.dart';
+
 import '../../../../services/service_locator.dart';
 import '../bloc/home_bloc.dart';
-import 'add_doctor_page.dart';
+import '../bloc/summaries_bloc.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,34 +18,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController _doctorNameController = TextEditingController();
-  final TextEditingController _specializationController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  final FocusNode _nameFocusNode = FocusNode();
-  final FocusNode _specializationFocusNode = FocusNode();
-  final FocusNode _locationFocusNode = FocusNode();
-
   @override
   void dispose() {
-    _doctorNameController.dispose();
-    _specializationController.dispose();
-    _locationController.dispose();
-    _nameFocusNode.dispose();
-    _specializationFocusNode.dispose();
-    _locationFocusNode.dispose();
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => serviceLocator<HomeBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => serviceLocator<HomeBloc>()),
+        BlocProvider(create: (_) => SummariesBloc()..add(const FetchSummariesEvent())),
+      ],
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text(
-            'Previous Recordings',
+            'Summaries',
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -57,13 +42,10 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           actions: [
-
             IconButton(
-              icon: const Icon(Icons.logout),
+              icon: const Icon(Icons.person),
               onPressed: () {
-                context.read<AuthBloc>().add(OnLogout());
-                context.goNamed(RouteConst.splashScreen);
-                // Implement filter functionality
+                context.pushNamed(RouteConst.profileScreen);
               },
             ),
           ],
@@ -71,57 +53,147 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        body: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: 10, // Dummy data count
-          itemBuilder: (context, index) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD), // Very light blue
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Dr. John',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 11,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+        body: _SummariesList(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context.pushNamed(RouteConst.addDoctorPage);
+            context.pushNamed(RouteConst.recordingScreen);
           },
-          backgroundColor: ColorConst.primaryBlue,
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
+          backgroundColor: Colors.black,
+          child: const Icon(Icons.mic, color: Colors.white),
         ),
       ),
+    );
+  }
+}
+
+class _SummariesList extends StatefulWidget {
+  @override
+  State<_SummariesList> createState() => _SummariesListState();
+}
+
+class _SummariesListState extends State<_SummariesList> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_controller.hasClients) return;
+    final state = context.read<SummariesBloc>().state;
+    if (_controller.position.pixels >= _controller.position.maxScrollExtent - 200) {
+      if (state.hasMore && !state.isLoadingMore && state.summariesWithDoctorNames.isNotEmpty) {
+        context.read<SummariesBloc>().add(const FetchSummariesEvent(isLoadMore: true));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SummariesBloc, SummariesState>(
+      builder: (context, state) {
+        if (state.fetchStatus is StateLoading && state.summariesWithDoctorNames.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state.summariesWithDoctorNames.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.note_alt_outlined, size: 72, color: Colors.grey[400]),
+                const SizedBox(height: 12),
+                const Text('No summaries yet', style: TextStyle(color: Colors.black54)),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            // Trigger a fresh fetch of summaries
+            context.read<SummariesBloc>().add(const FetchSummariesEvent());
+          },
+          child: ListView.builder(
+            controller: _controller,
+            padding: const EdgeInsets.all(16),
+            itemCount: state.summariesWithDoctorNames.length + 1,
+            itemBuilder: (context, index) {
+              if (index == state.summariesWithDoctorNames.length) {
+                if (state.isLoadingMore) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (state.hasReachedEnd) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        'You reached the end of the list',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              }
+
+              final summaryWithDoctor = state.summariesWithDoctorNames[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                height: rpHeight(context, 100),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7F7F7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "Dr. ${summaryWithDoctor.doctorName}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (summaryWithDoctor.summary.summaryText != null)
+                      Text(
+                        summaryWithDoctor.summary.summaryText!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13, color: Colors.black),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 } 

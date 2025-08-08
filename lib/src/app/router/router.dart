@@ -2,15 +2,21 @@
 import 'dart:async';
 
 import 'package:base_architecture/src/app/router/route_const.dart';
+import 'package:base_architecture/src/features/auth/presentation/view/onboarding_succes_page.dart';
 import 'package:base_architecture/src/features/auth/presentation/view/setup_user_page.dart';
 import 'package:base_architecture/src/features/auth/presentation/view/sign_in_screen.dart';
 import 'package:base_architecture/src/features/home/presentation/bloc/home_bloc.dart';
-import 'package:base_architecture/src/features/home/presentation/view/add_doctor_page.dart';
+import 'package:base_architecture/src/features/home/presentation/view/recording_page.dart';
+import 'package:base_architecture/src/features/profile/presentation/bloc/view/pages/add_doctor_page.dart';
+import 'package:base_architecture/src/features/profile/presentation/bloc/view/pages/doctors_listing_page.dart';
+import 'package:base_architecture/src/features/profile/data/model/doctor_model.dart';
+import 'package:base_architecture/src/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:base_architecture/src/features/home/presentation/view/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lifecycle/lifecycle.dart';
+import '../../features/profile/presentation/bloc/view/pages/profile_page.dart';
 import '../../features/splash/presentation/view/splash_screen.dart';
 
 import '../../services/service_locator.dart';
@@ -23,7 +29,7 @@ class NavigationManager {
   GlobalKey<ScaffoldMessengerState>();
 
   final GoRouter router = GoRouter(
-    initialLocation: RouteConst.start,
+    initialLocation: RouteConst.splashScreen,
     navigatorKey: navigatorKey,
     observers: [
       GoRouterObserver(),
@@ -31,9 +37,9 @@ class NavigationManager {
     ],
     errorBuilder: (final context, final state) => const PageNotFound(),
     routes: <RouteBase>[
-
       GoRoute(
         path: RouteConst.start,
+        name: RouteConst.start,
         redirect: (ctx, state) async {
           final pref = serviceLocator<SharedPreferenceBaseService>();
           bool isLoggedIn = await pref.getAttribute(SharedPrefKeys.isLoggedIn, false);
@@ -67,8 +73,9 @@ class NavigationManager {
       GoRoute(
         path: RouteConst.setupProfile,
         name: RouteConst.setupProfile,
-        builder: (_, _) {
-          return const SetupUserPage();
+        builder: (context, state) {
+          final isOnboarding = state.extra as bool? ?? true;
+          return SetupUserPage(isOnboarding: isOnboarding);
         },
       ),
       GoRoute(
@@ -85,37 +92,49 @@ class NavigationManager {
       GoRoute(
         path: RouteConst.addDoctorPage,
         name: RouteConst.addDoctorPage,
-        builder: (_, _) {
-          return BlocProvider<HomeBloc>(
-            create: (context) => HomeBloc(),
-            child: const AddDoctorPage(
-            ),
-          ); ;
+        builder: (context, state) {
+          final doctor = state.extra as DoctorModel?;
+          return BlocProvider<ProfileBloc>(
+            create: (context) => ProfileBloc(),
+            child: AddDoctorPage(doctor: doctor),
+          );
         },
       ),
+      GoRoute(
+        path: RouteConst.doctorsListingPage,
+        name: RouteConst.doctorsListingPage,
+        builder: (context, state) {
+          return BlocProvider<ProfileBloc>(
+            create: (context) => ProfileBloc(),
+            child: const DoctorsListingPage(),
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteConst.onboardingSuccess,
+        name: RouteConst.onboardingSuccess,
+        builder: (_, _) {
+          return OnboardingSuccessPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConst.profileScreen,
+        name: RouteConst.profileScreen,
+        builder: (_, _) {
+          return const ProfilePage();
+        },
+      ),
+      GoRoute(
+        path: RouteConst.recordingScreen,
+        name: RouteConst.recordingScreen,
+        builder: (_, _) => const RecordingPage(),
+      ),
+
 
 
     ],
   );
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-
-
-  static FutureOr<String?> _welcomeBuilder(BuildContext context, GoRouterState state) async {
-    final pref = serviceLocator<SharedPreferenceBaseService>();
-    bool isLoggedIn = await pref.getAttribute(SharedPrefKeys.isLoggedIn, false);
-    bool isOnboarded = await pref.getAttribute(SharedPrefKeys.isOnboarded, false);
-    if (isLoggedIn) {
-      if(isOnboarded) {
-        return RouteConst.homePage;
-      } else{
-        return RouteConst.setupProfile;
-      }
-    } else {
-      return RouteConst.loginPage;
-    }
-    return null;
-  }
 
 }
 

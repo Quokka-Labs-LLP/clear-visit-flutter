@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../shared/constants/color_constants.dart';
-import '../../../../shared/widgets/common_button.dart';
-import '../../../../shared/widgets/custom_text_field.dart';
-import '../../../../shared/utilities/event_status.dart';
-import '../../../../services/service_locator.dart';
-import '../bloc/home_bloc.dart';
+import '../../../../../../app/router/route_const.dart';
+import '../../../../../../shared/constants/color_constants.dart';
+import '../../../../../../shared/widgets/common_button.dart';
+import '../../../../../../shared/widgets/custom_text_field.dart';
+import '../../../../../../shared/utilities/event_status.dart';
+import '../../../../../../services/service_locator.dart';
+import '../../../../data/model/doctor_model.dart';
+import '../../profile_bloc.dart';
 
 class AddDoctorPage extends StatefulWidget {
-  const AddDoctorPage({super.key});
+  final DoctorModel? doctor;
+  
+  const AddDoctorPage({super.key, this.doctor});
 
   @override
   State<AddDoctorPage> createState() => _AddDoctorPageState();
@@ -23,6 +27,18 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _specializationFocusNode = FocusNode();
   final FocusNode _locationFocusNode = FocusNode();
+  bool _isUpdateMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.doctor != null) {
+      _isUpdateMode = true;
+      _doctorNameController.text = widget.doctor!.name;
+      _specializationController.text = widget.doctor!.specialization;
+      _locationController.text = widget.doctor!.location ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -35,7 +51,7 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
     super.dispose();
   }
 
-  void _addDoctor() {
+  void _addOrUpdateDoctor() {
     final doctorName = _doctorNameController.text.trim();
     final specialization = _specializationController.text.trim();
     final location = _locationController.text.trim();
@@ -54,13 +70,22 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
       return;
     }
 
-    context.read<HomeBloc>().add(
-      OnAddDoctorEvent(
+    if (_isUpdateMode && widget.doctor != null) {
+      final updatedDoctor = widget.doctor!.copyWith(
         name: doctorName,
         specialization: specialization,
-        location: location,
-      ),
-    );
+        location: location.isNotEmpty ? location : null,
+      );
+      context.read<ProfileBloc>().add(UpdateDoctorEvent(doctor: updatedDoctor));
+    } else {
+      context.read<ProfileBloc>().add(
+        AddDoctorEvent(
+          name: doctorName,
+          specialization: specialization,
+          location: location,
+        ),
+      );
+    }
   }
 
   void _clearForm() {
@@ -79,27 +104,55 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
             context.pop();
           },
         ),
-        title: const Text('Add a Doctor'),
+        title: Text(_isUpdateMode ? 'Update Doctor' : 'Add a Doctor'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: BlocListener<HomeBloc, HomeState>(
+        child: BlocListener<ProfileBloc, ProfileState>(
           listener: (context, state) {
             if (state.addDoctorStatus is StateLoaded) {
-              _clearForm();
+              if (!_isUpdateMode) {
+                _clearForm();
+              }
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Doctor added successfully!'),
+                SnackBar(
+                  content: Text(_isUpdateMode 
+                    ? 'Doctor updated successfully!' 
+                    : 'Doctor added successfully!'),
                   backgroundColor: Colors.green,
                 ),
               );
+              // Clear the status to prevent multiple snackbars
+              context.read<ProfileBloc>().add(const ClearDoctorStatusEvent());
+              context.pop(true);
             } else if (state.addDoctorStatus is StateFailed) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
                     (state.addDoctorStatus as StateFailed).errorMessage,
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+
+            if (state.updateDoctorStatus is StateLoaded) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Doctor updated successfully!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              // Clear the status to prevent multiple snackbars
+              context.read<ProfileBloc>().add(const ClearDoctorStatusEvent());
+              context.pop(true);
+            } else if (state.updateDoctorStatus is StateFailed) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    (state.updateDoctorStatus as StateFailed).errorMessage,
                   ),
                   backgroundColor: Colors.red,
                 ),
@@ -139,13 +192,17 @@ class _AddDoctorPageState extends State<AddDoctorPage> {
                 isReadOnly: false,
               ),
               const SizedBox(height: 30),
-              BlocBuilder<HomeBloc, HomeState>(
+              BlocBuilder<ProfileBloc, ProfileState>(
                 builder: (context, state) {
+                  final isLoading = state.addDoctorStatus is StateLoading || 
+                                 state.updateDoctorStatus is StateLoading;
+                  final buttonText = isLoading 
+                    ? (_isUpdateMode ? "Updating..." : "Adding...") 
+                    : (_isUpdateMode ? "Update Doctor" : "Add Doctor");
+                  
                   return CommonButton(
-                    onTap: (){
-                      state.addDoctorStatus is StateLoading ? null : _addDoctor();
-                    },
-                    btnText: state.addDoctorStatus is StateLoading ? "Adding..." : "Add Doctor",
+                    onTap:() { isLoading ? null : _addOrUpdateDoctor();},
+                    btnText: buttonText,
                     fontSize: 16,
                     fontColor: Colors.white,
                     fontWeight: FontWeight.bold,

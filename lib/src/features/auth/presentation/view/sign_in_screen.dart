@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:io' show Platform;
+import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../app/router/router.dart';
 import '../../../../shared/constants/color_constants.dart';
 import '../../../../shared/constants/image_constants.dart';
 import '../../../../shared/utilities/event_status.dart';
@@ -28,28 +28,13 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
-  void _onMobileChanged(String value) {
-    context.read<AuthBloc>().add(OnValidateMobileEvent(mobileNumber: value));
-  }
-
-  void _onSubmitPressed() {
-    final bloc = context.read<AuthBloc>();
-    if (bloc.state.isMobileValid) {
-      bloc.add(
-        bloc.state.isSignInMode
-            ? OnMobileSignInEvent(mobileNumber: _mobileController.text)
-            : OnSignUpEvent(mobileNumber: _mobileController.text),
-      );
-    }
-  }
-
-  void _toggleMode() {
-    context.read<AuthBloc>().add(OnToggleAuthMode());
-  }
-
   void _onContinueWithApple() {
-    context.read<AuthBloc>().add(OnAppleSignInEvent());
-
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Coming Soon!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   void _onContinueWithGoogle() {
@@ -59,43 +44,30 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: ColorConst.white,
+      backgroundColor: Colors.white,
       body: SafeArea(
         bottom: false,
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state.signInStatus is StateLoaded) {
-              context.goNamed(RouteConst.homePage);
+            if (state.appleSignInStatus is StateLoaded || state.googleSignInStatus is StateLoaded) {
+              context.goNamed(RouteConst.setupProfile);
             }
           },
           builder: (context, state) {
             return Stack(
               children: [
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildHeader(state),
-                      const SizedBox(height: 50),
-                      _buildForm(state),
-                      const SizedBox(height: 30),
-                      _buildFooter(),
-                    ],
-                  ),
-                ),
-                if(state.signInStatus is StateLoading)
-                Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.black12.withOpacity(0.3),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: ColorConst.black,
+                _buildMainContent(state),
+                if (state.appleSignInStatus is StateLoading || state.googleSignInStatus is StateLoading)
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    color: Colors.black12.withOpacity(0.3),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: ColorConst.black,
+                      ),
                     ),
-                  ),
-
-                )
-
+                  )
               ],
             );
           },
@@ -104,175 +76,231 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildHeader(AuthState state) {
+  Widget _buildMainContent(AuthState state) {
     return Column(
       children: [
-        Image.asset(ImageConst.splashName, height: 100),
-        const SizedBox(height: 24),
-        Text(
-          state.isSignInMode ? 'Welcome Back' : 'Create Account',
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: ColorConst.primaryBlue,
-          ),
+        // Top section with logo and welcome text
+        Flexible(
+          flex: 2,
+          child: _buildHeader(),
         ),
-        const SizedBox(height: 8),
-        Text(
-          state.isSignInMode
-              ? 'Sign in to clear you conversations'
-              : 'Sign up to get started',
-          style: const TextStyle(
-            fontSize: 16,
-            color: ColorConst.grey,
-            height: 1.4,
-          ),
-          textAlign: TextAlign.center,
+        // Authentication options section
+        Flexible(
+          flex: 3,
+          child: _buildAuthenticationOptions(state),
         ),
+        // Footer section - will be pushed to bottom
+        _buildFooter(),
       ],
     );
   }
 
-  Widget _buildForm(AuthState state) {
+  Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildPlatformButtons(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlatformButtons() {
-    if (Platform.isIOS) {
-      // On iOS, show both Google and Apple buttons
-      return Column(
-        children: [
-          _buildGoogleButton(),
-          const SizedBox(height: 16),
-          _buildAppleButton(),
-        ],
-      );
-    } else if (Platform.isAndroid) {
-      // On Android, show only Google button
-      return _buildGoogleButton();
-    } else {
-      // Fallback for other platforms
-      return Container();
-    }
-  }
-
-  Widget _buildAppleButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton.icon(
-        onPressed: _onContinueWithApple,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-        icon: const Icon(Icons.apple, size: 24),
-        label: const Text(
-          'Continue with Apple',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGoogleButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton.icon(
-        onPressed: _onContinueWithGoogle,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.shade300),
+          // Logo positioned at 30% from top
+          SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+          Image.asset(
+            ImageConst.splashName,
+            height: 80,
+            width: 80,
           ),
-        ),
-        icon: const Icon(Icons.g_mobiledata, size: 24),
-        label: const Text(
-          'Continue with Google',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
+          const SizedBox(height: 24),
+          // Welcome text
+          Text(
+            'Medical Conversations Made Simple',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          // Subtext
+          Text(
+            'AI-powered notes for your doctor visits',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF757575),
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
+  Widget _buildAuthenticationOptions(AuthState state) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (Platform.isIOS) ...[
+            _buildAppleButton(state),
+            const SizedBox(height: 16),
+            _buildGoogleButton(state),
+          ] else if (Platform.isAndroid) ...[
+            _buildGoogleButton(state),
+          ] else ...[
+            _buildGoogleButton(state),
+          ],
+        ],
+      ),
+    );
+  }
 
+  Widget _buildAppleButton(AuthState state) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isLoading = state.appleSignInStatus is StateLoading;
 
-  Widget _buildSubmitButton(AuthState state) {
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: state.isMobileValid && state.apiCallStatus is! StateLoading
-            ? _onSubmitPressed
-            : null,
+        onPressed: isLoading ? null : _onContinueWithApple,
         style: ElevatedButton.styleFrom(
-          backgroundColor: ColorConst.primaryBlue,
-          foregroundColor: ColorConst.white,
+          backgroundColor: isDarkMode ? Colors.white : Colors.black,
+          foregroundColor: isDarkMode ? Colors.black : Colors.white,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          disabledBackgroundColor: Colors.grey.shade300,
-          disabledForegroundColor: Colors.grey.shade600,
-        ),
-        child: state.apiCallStatus is StateLoading
-            ? const SizedBox(
-          height: 24,
-          width: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            valueColor: AlwaysStoppedAnimation<Color>(ColorConst.white),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
           ),
-        )
-            : Text(
-          state.isSignInMode ? 'Sign In' : 'Sign Up',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
+        child: isLoading
+            ? SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isDarkMode ? Colors.black : Colors.white,
+                  ),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.apple,
+                    size: 24,
+                    color: isDarkMode ? Colors.black : Colors.white,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Continue with Apple',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'SF Pro Display',
+                      color: isDarkMode ? Colors.black : Colors.white,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
 
-  Widget _buildToggleModeText(AuthState state) {
-    return GestureDetector(
-      onTap: _toggleMode,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            state.isSignInMode ? 'Don\'t have an account? ' : 'Already have an account? ',
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-          ),
-          Text(
-            state.isSignInMode ? 'Sign Up' : 'Sign In',
-            style: const TextStyle(
-              color: ColorConst.primaryBlue,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+  Widget _buildGoogleButton(AuthState state) {
+    final isLoading = state.googleSignInStatus is StateLoading;
+    
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFFDADCE0), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(28),
+          onTap: isLoading ? null : _onContinueWithGoogle,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isLoading)
+                  SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.black87),
+                    ),
+                  )
+                else ...[
+                  SvgPicture.asset(
+                    ImageConst.googleIcon,
+                    height: 24,
+                    width: 24,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Continue with Google',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto',
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildFooter() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0),
-      child: Text(
-        'By continuing, you agree to our Terms of Service\nand Privacy Policy',
-        style: TextStyle(fontSize: 12, color: Colors.grey[500], height: 1.4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: RichText(
         textAlign: TextAlign.center,
+        text: TextSpan(
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF757575),
+            height: 1.4,
+          ),
+          children: [
+            const TextSpan(text: 'By continuing, you agree to our '),
+            TextSpan(
+              text: 'Privacy Policy',
+              style: TextStyle(
+                color: ColorConst.primaryBlue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            const TextSpan(text: ' and '),
+            TextSpan(
+              text: 'Terms of Service',
+              style: TextStyle(
+                color: ColorConst.primaryBlue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -40,8 +40,9 @@ class OnValidateMobileEvent extends AuthEvent {
 
 class OnNameSubmitted extends AuthEvent {
   final String name;
+  final bool fromSignUpPage;
 
-  const OnNameSubmitted({required this.name});
+  const OnNameSubmitted({required this.name, this.fromSignUpPage = false});
 
   @override
   List<Object?> get props => [name];
@@ -69,6 +70,13 @@ class OnGoogleSignInEvent extends AuthEvent {
 }
 class OnLogout extends AuthEvent {
   const OnLogout();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class GetUserName extends AuthEvent {
+  const GetUserName();
 
   @override
   List<Object?> get props => [];
