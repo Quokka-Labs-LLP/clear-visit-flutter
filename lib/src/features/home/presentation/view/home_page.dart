@@ -28,7 +28,9 @@ class _HomePageState extends State<HomePage> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => serviceLocator<HomeBloc>()),
-        BlocProvider(create: (_) => SummariesBloc()..add(const FetchSummariesEvent())),
+        BlocProvider(
+          create: (_) => SummariesBloc()..add(const FetchSummariesEvent()),
+        ),
       ],
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -57,7 +59,7 @@ class _HomePageState extends State<HomePage> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context.pushNamed(RouteConst.recordingScreen);
+            context.pushNamed(RouteConst.doctorsListingPage, extra: true);
           },
           backgroundColor: Colors.black,
           child: const Icon(Icons.mic, color: Colors.white),
@@ -90,9 +92,14 @@ class _SummariesListState extends State<_SummariesList> {
   void _onScroll() {
     if (!_controller.hasClients) return;
     final state = context.read<SummariesBloc>().state;
-    if (_controller.position.pixels >= _controller.position.maxScrollExtent - 200) {
-      if (state.hasMore && !state.isLoadingMore && state.summariesWithDoctorNames.isNotEmpty) {
-        context.read<SummariesBloc>().add(const FetchSummariesEvent(isLoadMore: true));
+    if (_controller.position.pixels >=
+        _controller.position.maxScrollExtent - 200) {
+      if (state.hasMore &&
+          !state.isLoadingMore &&
+          state.summariesWithDoctorNames.isNotEmpty) {
+        context.read<SummariesBloc>().add(
+          const FetchSummariesEvent(isLoadMore: true),
+        );
       }
     }
   }
@@ -101,7 +108,8 @@ class _SummariesListState extends State<_SummariesList> {
   Widget build(BuildContext context) {
     return BlocBuilder<SummariesBloc, SummariesState>(
       builder: (context, state) {
-        if (state.fetchStatus is StateLoading && state.summariesWithDoctorNames.isEmpty) {
+        if (state.fetchStatus is StateLoading &&
+            state.summariesWithDoctorNames.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -110,9 +118,16 @@ class _SummariesListState extends State<_SummariesList> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.note_alt_outlined, size: 72, color: Colors.grey[400]),
+                Icon(
+                  Icons.note_alt_outlined,
+                  size: 72,
+                  color: Colors.grey[400],
+                ),
                 const SizedBox(height: 12),
-                const Text('No summaries yet', style: TextStyle(color: Colors.black54)),
+                const Text(
+                  'No summaries yet',
+                  style: TextStyle(color: Colors.black54),
+                ),
               ],
             ),
           );
@@ -150,44 +165,59 @@ class _SummariesListState extends State<_SummariesList> {
               }
 
               final summaryWithDoctor = state.summariesWithDoctorNames[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                height: rpHeight(context, 100),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF7F7F7),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.person, size: 16, color: Colors.grey[600]),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            "Dr. ${summaryWithDoctor.doctorName}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+              return InkWell(
+                onTap: () {
+                  final id = summaryWithDoctor.summary.id;
+                  if (id != null) {
+                    context.pushNamed(
+                      RouteConst.summaryScreen,
+                      extra: {'summaryId': id},
+                    );
+                    // context.pushNamed(RouteConst.summaryDetailScreen, extra: id);
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  height: rpHeight(context, 100),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7F7F7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Dr. ${summaryWithDoctor.doctorName}",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    if (summaryWithDoctor.summary.summaryText != null)
-                      Text(
-                        summaryWithDoctor.summary.summaryText!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, color: Colors.black),
+                        ],
                       ),
-                  ],
+                      const SizedBox(height: 8),
+                      if (summaryWithDoctor.summary.summaryText != null)
+                        Text(
+                          summaryWithDoctor.summary.summaryText!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -196,4 +226,4 @@ class _SummariesListState extends State<_SummariesList> {
       },
     );
   }
-} 
+}

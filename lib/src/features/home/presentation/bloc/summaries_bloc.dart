@@ -1,10 +1,10 @@
+import 'package:base_architecture/src/features/home/data/model/summary_with_doc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../shared/utilities/event_status.dart';
-import '../../data/model/summary_model.dart';
 import '../../data/repo_impl/summary_repo_impl.dart';
 import '../../domain/repo/summary_repo.dart';
 
@@ -69,15 +69,45 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
         ));
       }
     });
+    on<StartTranscriptionEvent>((event, emit) async{
+      try {
+        emit(state.copyWith(isLoadingTranscription: true, errorMessage: null));
+
+        final user = _auth.currentUser;
+        if (user == null) throw Exception('User not authenticated');
+        final result = await _repo.createSummaryFromRecording(
+          patientId: user.uid,
+          doctorId: event.doctorId ?? '',
+          filePath: event.localFilePath!,
+        );
+        emit(state.copyWith(isLoadingTranscription: false, summaryText: result.summaryText, followUpQuestions: result.followUpQuestions));
+      } catch (e) {
+        emit(state.copyWith(
+          isLoadingTranscription: false,
+          errorMessage: e.toString(),
+        ));
+      }
+    });
+
+    on<GetSummaryDetailsEvent>((event, emit) async{
+      emit(state.copyWith(isLoadingTranscription: true, errorMessage: null));
+      try {
+        final summary = await _repo.getSummaryById(event.summaryId);
+        if (summary == null) {
+          emit(state.copyWith(isLoadingTranscription: false, errorMessage: 'Summary not found'));
+          return;
+        }
+        // final doctorName = await _repo.getDoctorName(summary.doctorId) ?? 'Unknown Doctor';
+        emit(state.copyWith(
+          isLoadingTranscription: false,
+          summaryText: summary.summaryText ?? '',
+          followUpQuestions: summary.followUpQuestions
+        ));
+      } catch (e) {
+        emit(state.copyWith(isLoadingTranscription: false, errorMessage: e.toString()));
+      }
+    });
   }
 }
 
-class SummaryWithDoctorName {
-  final SummaryModel summary;
-  final String doctorName;
 
-  SummaryWithDoctorName({
-    required this.summary,
-    required this.doctorName,
-  });
-}

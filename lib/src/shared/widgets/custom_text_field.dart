@@ -34,7 +34,7 @@ class CustomTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         focusNode: focusNode,
-        keyboardType: TextInputType.phone,
+        keyboardType: TextInputType.name,
         maxLength: 100,
         onChanged: onChanged,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),

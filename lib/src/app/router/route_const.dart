@@ -9,6 +9,8 @@ class RouteConst{
   static const onboardingSuccess = '/onboardingSuccess';
   static const profileScreen = '/profileScreen';
   static const recordingScreen = '/recordingScreen';
+  static const summaryScreen = '/summaryScreen';
+  static const summaryDetailScreen = '/summaryDetailScreen';
 
 
 }

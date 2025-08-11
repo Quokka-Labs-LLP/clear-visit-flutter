@@ -11,7 +11,9 @@ import '../widgets/loading_widget.dart';
 import '../widgets/doctors_list_widget.dart';
 
 class DoctorsListingPage extends StatefulWidget {
-  const DoctorsListingPage({super.key});
+  final bool selectionMode;
+
+  const DoctorsListingPage({super.key, this.selectionMode = false});
 
   @override
   State<DoctorsListingPage> createState() => _DoctorsListingPageState();
@@ -56,7 +58,7 @@ class _DoctorsListingPageState extends State<DoctorsListingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Doctors'),
+        title: Text(widget.selectionMode ? 'Select Doctor' : 'My Doctors'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -97,16 +99,29 @@ class _DoctorsListingPageState extends State<DoctorsListingPage> {
             onRefresh: () async {
               context.read<ProfileBloc>().add(const FetchDoctorsEvent());
             },
-            onDoctorTap: (doctor) => _navigateToAddDoctor(doctor: doctor),
+            onDoctorTap: (doctor) {
+              if (widget.selectionMode) {
+                context.pushNamed(RouteConst.recordingScreen, extra: doctor.id);
+              } else {
+                _navigateToAddDoctor(doctor: doctor);
+              }
+            },
             onDoctorEditTap: (doctor) => _navigateToAddDoctor(doctor: doctor),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddDoctor(),
+        onPressed: () async {
+          final result = await context.pushNamed<bool>(RouteConst.addDoctorPage);
+          if (result == true) {
+              if (mounted) {
+                context.read<ProfileBloc>().add(const FetchDoctorsEvent());
+              }
+          }
+        },
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
+        child: Icon(widget.selectionMode ? Icons.person_add : Icons.add),
       ),
     );
   }

@@ -12,6 +12,7 @@ import 'package:base_architecture/src/features/profile/presentation/bloc/view/pa
 import 'package:base_architecture/src/features/profile/data/model/doctor_model.dart';
 import 'package:base_architecture/src/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:base_architecture/src/features/home/presentation/view/home_page.dart';
+import 'package:base_architecture/src/features/home/presentation/view/summary_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -104,9 +105,10 @@ class NavigationManager {
         path: RouteConst.doctorsListingPage,
         name: RouteConst.doctorsListingPage,
         builder: (context, state) {
+          final selectionMode = (state.extra as bool?) ?? false;
           return BlocProvider<ProfileBloc>(
             create: (context) => ProfileBloc(),
-            child: const DoctorsListingPage(),
+            child: DoctorsListingPage(selectionMode: selectionMode),
           );
         },
       ),
@@ -127,7 +129,17 @@ class NavigationManager {
       GoRoute(
         path: RouteConst.recordingScreen,
         name: RouteConst.recordingScreen,
-        builder: (_, _) => const RecordingPage(),
+        builder: (context, state) {
+          final doctorId = state.extra as String?;
+          return RecordingPage(doctorId: doctorId);
+        },
+      ),
+      GoRoute(
+        path: RouteConst.summaryScreen,
+        name: RouteConst.summaryScreen,
+        builder: (context, state) {
+          return const SummaryScreen();
+        },
       ),
 
 

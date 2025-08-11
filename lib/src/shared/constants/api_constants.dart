@@ -4,5 +4,8 @@ class ApiConst {
   ApiConst._();
 
   static String baseUrl = dotenv.env['BASE_URL'] ?? '';
-  static String sampleApi = '$baseUrl/api/v1/employees';
+  static String deepgramBaseUrl = dotenv.env['DEEPGRAM_BASE_URL'] ?? 'https://api.deepgram.com/v1/listen';
+  static String groqBaseUrl = dotenv.env['GROQ_BASE_URL'] ?? 'https://api.groq.com/openai/v1/chat/completions';
+  static String deepgramApiKey = dotenv.env['DEEPGRAM_API_KEY'] ?? '';
+  static String groqApiKey = dotenv.env['GROQ_API_KEY'] ?? '';
 }

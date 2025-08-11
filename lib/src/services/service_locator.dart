@@ -24,7 +24,9 @@ Future<void> init() async {
   serviceLocator.registerLazySingleton<Dio>(() => DioClient().provideDio());
   serviceLocator.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   serviceLocator.registerLazySingleton<ProfileRepo>(() => ProfileRepoImpl());
-  serviceLocator.registerLazySingleton<SummaryRepo>(() => SummaryRepoImpl());
+  if (!serviceLocator.isRegistered<SummaryRepo>()) {
+    serviceLocator.registerLazySingleton<SummaryRepo>(() => SummaryRepoImpl());
+  }
   serviceLocator.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   serviceLocator.registerLazySingleton<HomeBloc>(() => HomeBloc());
   serviceLocator.registerLazySingleton<AuthBloc>(() => AuthBloc());
