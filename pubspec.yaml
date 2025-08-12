@@ -17,18 +17,23 @@ dependencies:
   another_flushbar: ^1.12.30
   cupertino_icons: ^1.0.8
   cloud_firestore: ^6.0.0
+  crypto: ^3.0.6
   dio: ^5.1.2
   shared_preferences: ^2.0.15
   fluttertoast: ^8.1.2
   flutter_svg: ^2.2.0
+  firebase_storage: ^13.0.0
   lifecycle: ^0.10.0
   flutter_bloc: ^9.1.1
   fpdart: ^1.1.1
+  ffmpeg_kit_flutter_new: ^3.2.0
   get_it: ^8.0.3
+  http: ^1.5.0
   equatable: ^2.0.5
   go_router: any
   lottie: ^3.3.1
   flutter_dotenv: ^5.0.2
+  just_audio: ^0.10.4
   connectivity_plus: ^6.1.4
   flutter_native_splash: ^2.3.1
   build_runner: ^2.4.5
@@ -44,6 +49,7 @@ dependencies:
   record: ^6.0.0
   shimmer: ^3.0.0
   permission_handler: ^11.4.0
+  path: ^1.9.1
 
 
 

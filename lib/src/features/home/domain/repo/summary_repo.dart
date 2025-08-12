@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../data/model/summary_model.dart';
@@ -11,8 +13,8 @@ abstract class SummaryRepo {
     required String filePath,
   });
 
-  Future<List<String>> getFollowUpQuestions({
-    required String summary,
+  Future<List<String>> getFollowUpSummaryAndQuestions({
+    required String transcript,
   });
 
 
@@ -23,6 +25,7 @@ class SummaryCreationResult {
   final String documentId;
   final String summaryText;
   final List<String> followUpQuestions;
+  // final String? filePath;
 
-  SummaryCreationResult({required this.documentId, required this.summaryText, required this.followUpQuestions});
+  SummaryCreationResult({required this.documentId, required this.summaryText, required this.followUpQuestions, });
 }

@@ -19,7 +19,7 @@ void printWarning(final String text) {
   }
 }
 
-void printError(final String text, {bool recordLog = true}) async {
+void printError(final String text, {bool recordLog = false}) async {
   if (recordLog) {
     _recordLogs(text, logType: LogType.error);
   }

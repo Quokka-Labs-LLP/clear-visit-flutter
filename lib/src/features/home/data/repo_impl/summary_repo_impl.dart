@@ -3,16 +3,126 @@ import 'dart:io';
 
 import 'package:base_architecture/src/shared/utilities/debug_logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../../services/service_locator.dart';
 import '../../../../shared/constants/api_constants.dart';
 import '../../domain/repo/summary_repo.dart';
 import '../model/summary_model.dart';
+import 'package:path/path.dart' as p;
 
 class SummaryRepoImpl implements SummaryRepo {
   final FirebaseFirestore _firestore = serviceLocator<FirebaseFirestore>();
+  final FirebaseStorage _storage = serviceLocator<FirebaseStorage>();
+
   final Dio _dio = Dio();
+
+  Future<File> _compressAudioFile(File inputFile) async {
+    final tempDir = await getTemporaryDirectory();
+    final outputPath =
+        '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_compressed.mp3';
+
+    final command =
+        '-i "${inputFile.path}" -b:a 128k -ar 44100 -ac 2 "$outputPath"';
+
+    final session = await FFmpegKit.execute(command);
+    final returnCode = await session.getReturnCode();
+
+    if (returnCode?.isValueSuccess() ?? false) {
+      return File(outputPath);
+    } else {
+      final logs = await session.getAllLogsAsString();
+      throw Exception('Audio compression failed: $logs');
+    }
+  }
+
+  String _generateFileNameForUpload({
+    required String filePath,
+    required String doctorId,
+    required String patientId,
+  }) {
+    final file = File(filePath);
+    final bytes = file.readAsBytesSync();
+    final digest = md5.convert(bytes).toString(); // crypto package
+    final ext = p.extension(filePath);
+
+    final fileName = '${doctorId}_$patientId\_$digest$ext';
+    printMessage("File name generated: $fileName");
+    return fileName;
+  }
+
+  Future<void> startUploadRecordingAndUpdateFirestore({
+    required String docId,
+    required String filePath,
+    required String doctorId,
+    required String patientId,
+  }) async {
+    final fileName = _generateFileNameForUpload(
+      filePath: filePath,
+      doctorId: doctorId,
+      patientId: patientId,
+    );
+
+    final storagePath = 'recording/$fileName';
+    final originalFile = File(filePath);
+
+    printMessage("Storage path for upload: $storagePath");
+
+    File fileToUpload = originalFile;
+    try {
+      fileToUpload = await _compressAudioFile(originalFile);
+      printMessage("Compression successful: ${fileToUpload.path}");
+    } catch (e) {
+      printError('Compression failed, using original file: $e');
+    }
+
+    final ref = _storage.ref().child(storagePath);
+    final uploadTask = ref.putFile(fileToUpload);
+
+    final subscription = uploadTask.snapshotEvents.listen(
+      (snapshot) async {
+        final transferred = snapshot.bytesTransferred;
+        final total = snapshot.totalBytes;
+        final progress = total > 0 ? transferred / total : 0.0;
+
+        try {
+          await _firestore.collection('summary').doc(docId).update({
+            'uploadProgress': progress,
+            'uploadStatus': 'uploading',
+          });
+        } catch (_) {}
+      },
+      onError: (e) async {
+        await _firestore.collection('summary').doc(docId).update({
+          'uploadStatus': 'failed',
+          'uploadError': e.toString(),
+        });
+      },
+    );
+
+    // Wait for completion
+    try {
+      await uploadTask;
+      final downloadUrl = await ref.getDownloadURL();
+      await _firestore.collection('summary').doc(docId).update({
+        'recordingUrl': downloadUrl,
+        'uploadStatus': 'completed',
+        'uploadProgress': 1.0,
+      });
+    } catch (e) {
+      await _firestore.collection('summary').doc(docId).update({
+        'uploadStatus': 'failed',
+        'uploadError': e.toString(),
+      });
+    } finally {
+      await subscription.cancel();
+    }
+  }
 
   @override
   Future<List<SummaryModel>> getSummaries(
@@ -79,7 +189,6 @@ class SummaryRepoImpl implements SummaryRepo {
     if (!await file.exists()) {
       throw Exception('Recording file missing');
     }
-
     final response = await _dio.post(
       url,
       data: file.openRead(),
@@ -93,41 +202,48 @@ class SummaryRepoImpl implements SummaryRepo {
     );
 
     final data = response.data as Map<String, dynamic>;
-    final results = data['results'] as Map<String, dynamic>;
-    String? summaryText;
-    if (results.containsKey('summary')) {
-      final summary = results['summary'] as Map<String, dynamic>;
-      summaryText = summary['short'] as String?;
-    }
-    summaryText ??= _extractTranscript(data);
+    String? transcript;
+    transcript ??= _extractTranscript(data);
 
-    final followUpQuestions = await getFollowUpQuestions(
-      summary: summaryText ?? "",
+    final summaryAndQuestions = await getFollowUpSummaryAndQuestions(
+      transcript: transcript ?? "",
     );
     printMessage("doctorId: $doctorId");
-    if (summaryText == null || summaryText.isEmpty) {
+    if (transcript == null || transcript.isEmpty) {
       throw Exception('Please try again, no summary generated');
     }
 
-    final doc = await _firestore.collection('summary').add({
+    final docRef = await _firestore.collection('summary').add({
       'patientId': patientId,
       'doctorId': doctorId,
       'title': 'Visit Summary',
-      'summaryText': summaryText,
+      'summaryText': summaryAndQuestions.first,
       'recordingPath': filePath,
-      'followUpQuestions': followUpQuestions,
+      'recordingUrl': null,
+      'followUpQuestions': summaryAndQuestions.sublist(1, 4),
       'createdAt': FieldValue.serverTimestamp(),
+      'uploadStatus': 'pending',
+      'uploadProgress': 0.0,
     });
 
+    startUploadRecordingAndUpdateFirestore(
+      docId: docRef.id,
+      filePath: filePath,
+      doctorId: doctorId,
+      patientId: patientId,
+    );
+
     return SummaryCreationResult(
-      documentId: doc.id,
-      summaryText: summaryText ?? "",
-      followUpQuestions: followUpQuestions,
+      documentId: docRef.id,
+      summaryText: summaryAndQuestions.first,
+      followUpQuestions: summaryAndQuestions.sublist(1, 4),
     );
   }
 
   @override
-  Future<List<String>> getFollowUpQuestions({required String summary}) async {
+  Future<List<String>> getFollowUpSummaryAndQuestions({
+    required String transcript,
+  }) async {
     try {
       final String url = ApiConst.groqBaseUrl;
 
@@ -143,15 +259,11 @@ class SummaryRepoImpl implements SummaryRepo {
         data: {
           "model": "openai/gpt-oss-20b",
           "messages": [
-            {
-              "role": "system",
-              "content":
-                  "You are a medical follow-up assistant.\nYou will receive a summary of a conversation between a doctor and a patient.\nFrom this summary, generate exactly three short, clear, and highly relevant follow-up questions that the patient should ask the doctor in their next appointment.\n\nGuidelines:\n- Output only a plain JSON array (list) of strings — no keys, no extra text.\n- The questions must be directly related to the patient's medical condition, diagnosis, treatment plan, or test results mentioned in the summary.\n- Avoid generic or unrelated questions.\n- Keep each question short (maximum 15 words) and easy for the patient to understand.\n- Do not add explanations or extra context.\n\nExample Input:\nSummary: The patient reported recurring headaches and blurred vision. The doctor suggested an MRI scan and prescribed medication to reduce inflammation. The doctor also mentioned the possibility of high eye pressure but advised confirming with further tests.\n\nExample Output:\n[\n  \"What could be causing my recurring headaches and blurred vision?\",\n  \"How soon should I get the MRI scan done?\",\n  \"What does high eye pressure mean for my long-term health?\"\n]",
-            },
-            {"role": "user", "content": "Summary: $summary"},
+            {"role": "system", "content": ApiConst.sysytemPrompt},
+            {"role": "user", "content": "Transcript: $transcript"},
           ],
           "temperature": 0.5,
-          "max_completion_tokens": 512,
+          "max_completion_tokens": 768,
           "top_p": 1,
           "reasoning_effort": "medium",
           "stream": false,
@@ -164,19 +276,24 @@ class SummaryRepoImpl implements SummaryRepo {
       if (content is String) {
         try {
           final parsed = List<String>.from(json.decode(content));
-          return parsed;
+
+          if (parsed.length == 5) {
+            return parsed;
+          } else {
+            throw Exception(
+              "Expected 5 elements (summary + 4 questions), got ${parsed.length}",
+            );
+          }
         } catch (_) {
-          return content
-              .split("\n")
-              .map((q) => q.trim())
-              .where((q) => q.isNotEmpty)
-              .toList();
+          throw Exception("Invalid JSON output: $content");
         }
       }
 
       throw Exception("Invalid response format: $data");
     } catch (e) {
-      throw Exception('Failed to fetch follow-up questions: ${e.toString()}');
+      throw Exception(
+        'Failed to fetch summary & follow-up questions: ${e.toString()}',
+      );
     }
   }
 

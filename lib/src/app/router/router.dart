@@ -5,7 +5,6 @@ import 'package:base_architecture/src/app/router/route_const.dart';
 import 'package:base_architecture/src/features/auth/presentation/view/onboarding_succes_page.dart';
 import 'package:base_architecture/src/features/auth/presentation/view/setup_user_page.dart';
 import 'package:base_architecture/src/features/auth/presentation/view/sign_in_screen.dart';
-import 'package:base_architecture/src/features/home/presentation/bloc/home_bloc.dart';
 import 'package:base_architecture/src/features/home/presentation/view/recording_page.dart';
 import 'package:base_architecture/src/features/profile/presentation/bloc/view/pages/add_doctor_page.dart';
 import 'package:base_architecture/src/features/profile/presentation/bloc/view/pages/doctors_listing_page.dart';
@@ -83,11 +82,8 @@ class NavigationManager {
         path: RouteConst.homePage,
         name: RouteConst.homePage,
         builder: (_, _) {
-        return  BlocProvider<HomeBloc>(
-            create: (context) => HomeBloc(),
-            child: const HomePage(
-            ),
-          );          HomePage();
+        return  HomePage(
+        );        HomePage();
         },
       ),
       GoRoute(

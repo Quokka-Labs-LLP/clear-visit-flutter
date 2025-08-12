@@ -7,7 +7,6 @@ import '../../../../shared/utilities/event_status.dart';
 import '../../../../shared/utilities/responsive _constants.dart';
 
 import '../../../../services/service_locator.dart';
-import '../bloc/home_bloc.dart';
 import '../bloc/summaries_bloc.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,7 +26,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => serviceLocator<HomeBloc>()),
         BlocProvider(
           create: (_) => SummariesBloc()..add(const FetchSummariesEvent()),
         ),

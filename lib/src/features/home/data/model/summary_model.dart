@@ -10,6 +10,8 @@ class SummaryModel {
   final String? recordingPath;
   final List<String>? followUpQuestions;
   final Timestamp createdAt;
+  final String? recordingUrl;
+  final String? uploadStatus;
 
   SummaryModel({
     this.id,
@@ -21,6 +23,8 @@ class SummaryModel {
     this.recordingPath,
     this.followUpQuestions,
     required this.createdAt,
+    this.recordingUrl,
+    this.uploadStatus,
   });
 
   factory SummaryModel.fromFirestore(DocumentSnapshot doc) {
@@ -37,6 +41,8 @@ class SummaryModel {
           ? List<String>.from(data['followUpQuestions'])
           : null,
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      recordingUrl: data['recordingUrl'] ?? '',
+      uploadStatus: data['uploadStatus'] ?? '',
     );
   }
 }

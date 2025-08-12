@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/auth/data/repo_impl/auth_repo_impl.dart';
 import '../features/auth/domain/repo/auth_repo.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
-import '../features/home/presentation/bloc/home_bloc.dart';
 import '../features/home/data/repo_impl/summary_repo_impl.dart';
 import '../features/home/domain/repo/summary_repo.dart';
 import '../features/profile/data/repo_impl/profile_repo_impl.dart';
@@ -24,11 +25,10 @@ Future<void> init() async {
   serviceLocator.registerLazySingleton<Dio>(() => DioClient().provideDio());
   serviceLocator.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   serviceLocator.registerLazySingleton<ProfileRepo>(() => ProfileRepoImpl());
-  if (!serviceLocator.isRegistered<SummaryRepo>()) {
-    serviceLocator.registerLazySingleton<SummaryRepo>(() => SummaryRepoImpl());
-  }
+  serviceLocator.registerLazySingleton<SummaryRepo>(() => SummaryRepoImpl());
   serviceLocator.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
-  serviceLocator.registerLazySingleton<HomeBloc>(() => HomeBloc());
+  serviceLocator.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
+  serviceLocator.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   serviceLocator.registerLazySingleton<AuthBloc>(() => AuthBloc());
 }
 

@@ -30,5 +30,35 @@ class GetSummaryDetailsEvent extends SummariesEvent {
   @override
   List<Object?> get props => [summaryId];
 }
+class LoadAudioEvent extends SummariesEvent {
+
+  final String? localPath;
+  final String? remoteUrl;
+  const LoadAudioEvent({this.localPath, this.remoteUrl});
+
+  @override
+  List<Object?> get props => [localPath, remoteUrl];
+}
+
+class PlayAudioEvent extends SummariesEvent {
+  @override
+  List<Object?> get props => [];
+}
+class PauseAudioEvent extends SummariesEvent {
+  @override
+  List<Object?> get props => [];
+}
+class StopAudioEvent extends SummariesEvent {
+  @override
+  List<Object?> get props => [];
+}
+
+class PositionChanged extends SummariesEvent {
+  final Duration position;
+  const PositionChanged(this.position);
+
+  @override
+  List<Object?> get props => [position];
+}
 
 

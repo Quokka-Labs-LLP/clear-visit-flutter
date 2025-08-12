@@ -23,7 +23,7 @@ class _RecordingPageState extends State<RecordingPage> {
       create: (_) => RecordingBloc()..add(const RecordingInitialize()),
       child: BlocConsumer<RecordingBloc, RecordingState>(
         listener: (context, state) {
-          if (state.completedFilePath != null) {
+          if (state.completedFilePath != null ) {
             context.goNamed(
               RouteConst.summaryScreen,
               extra: {
