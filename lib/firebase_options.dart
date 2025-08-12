@@ -55,18 +55,18 @@ class DefaultFirebaseOptions {
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBP3SZMtC9yKrPS2LQqNHJKDta5NnW6bks',
     appId: '1:520771909293:android:777d114e7fff3f9a717824',
-    messagingSenderId: '520771909293',
-    projectId: 'clear-visit-dev-5ad50',
-    storageBucket: 'clear-visit-dev-5ad50.firebasestorage.app',
+    messagingSenderId: '124980859440',
+    projectId: 'clearvisit-dcbab',
+    storageBucket: 'clearvisit-dcbab.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBxFb7HWS2zII5e7u0NjoRV4ZwibOsfj9U',
-    appId: '1:520771909293:ios:9cef6b8ad7ebb819717824',
-    messagingSenderId: '520771909293',
-    projectId: 'clear-visit-dev-5ad50',
-    storageBucket: 'clear-visit-dev-5ad50.firebasestorage.app',
-    iosClientId: '520771909293-i01e10g9b5t0i1gkjsu3m32t9oc7vrfk.apps.googleusercontent.com',
+    apiKey: 'AIzaSyD-fm55EZ4uaBQoXeecYft5j5qVQ6_jezQ',
+    appId: '1:124980859440:ios:a1dd20bfdeb759902013f5',
+    messagingSenderId: '124980859440',
+    projectId: 'clearvisit-dcbab',
+    storageBucket: 'clearvisit-dcbab.firebasestorage.app',
+    iosClientId: '124980859440-93hlikit5q9a25ffbjhcas3utf1rm6fq.apps.googleusercontent.com',
     iosBundleId: 'com.clearvisit.app',
   );
 

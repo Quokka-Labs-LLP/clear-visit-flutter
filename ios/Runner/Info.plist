@@ -46,16 +46,16 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>CFBundleURLTypes</key>
-      <array>
-        <dict>
-          <key>CFBundleTypeRole</key>
-          <string>Editor</string>
-          <key>CFBundleURLSchemes</key>
-          <array>
-            <string>com.googleusercontent.apps.520771909293-i01e10g9b5t0i1gkjsu3m32t9oc7vrfk</string>
-          </array>
-        </dict>
-      </array>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.124980859440-93hlikit5q9a25ffbjhcas3utf1rm6fq</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires microphone access to record your doctor visits.</string>
 </dict>
