@@ -205,13 +205,14 @@ class SummaryRepoImpl implements SummaryRepo {
     String? transcript;
     transcript ??= _extractTranscript(data);
 
-    final summaryAndQuestions = await getFollowUpSummaryAndQuestions(
-      transcript: transcript ?? "",
-    );
+
     printMessage("doctorId: $doctorId");
     if (transcript == null || transcript.isEmpty) {
       throw Exception('Please try again, no summary generated');
     }
+    final summaryAndQuestions = await getFollowUpSummaryAndQuestions(
+      transcript: transcript ?? "",
+    );
 
     final docRef = await _firestore.collection('summary').add({
       'patientId': patientId,

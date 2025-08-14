@@ -1,4 +1,5 @@
-class SampleWidgetArgs{
-  final String loginSuccess;
-  SampleWidgetArgs(this.loginSuccess);
+class RecordingScreenArgs {
+  final String? doctorId;
+  final String? doctorName;
+  RecordingScreenArgs({this.doctorId, this.doctorName});
 }

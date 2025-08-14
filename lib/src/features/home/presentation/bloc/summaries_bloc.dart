@@ -1,8 +1,13 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:base_architecture/src/features/home/data/model/summary_with_doc_model.dart';
 import 'package:base_architecture/src/services/service_locator.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +15,11 @@ import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:share_plus/share_plus.dart';
+
 import '../../../../shared/utilities/event_status.dart';
+import '../../../../shared/utilities/pdf_generator.dart';
+import '../../data/model/summary_model.dart';
 import '../../domain/repo/summary_repo.dart';
 
 part 'summaries_event.dart';
@@ -20,6 +29,8 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
   final FirebaseAuth _auth = serviceLocator<FirebaseAuth>();
   final SummaryRepo summaryRepo = serviceLocator<SummaryRepo>();
   final _player = AudioPlayer();
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
 
   SummariesBloc() : super( SummariesState()) {
     on<FetchSummariesEvent>(_onFetchSummariesEvent);
@@ -30,10 +41,21 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
     on<PauseAudioEvent>(_onPause);
     on<StopAudioEvent>(_onStop);
     on<PositionChanged>(_onPositionChanged);
+    on<PlayerStateChanged>(_onPlayerStateChanged);
+    on<ShareSummary>(_onShareSummary);
 
     // Listen to position updates from the player
-    _player.positionStream.listen((pos) {
-      add(PositionChanged(pos));
+    _positionSubscription = _player.positionStream.listen((pos) {
+      if (!isClosed) {
+        add(PositionChanged(pos));
+      }
+    });
+
+    // Listen to player state changes to sync UI with actual player state
+    _playerStateSubscription = _player.playerStateStream.listen((playerState) {
+      if (!isClosed) {
+        add(PlayerStateChanged(playerState));
+      }
     });
   }
   Future<void> _onFetchSummariesEvent(
@@ -59,7 +81,7 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
         // Resolve doctor names for new summaries
         final summariesWithDoctorNames = await Future.wait(
           summaries.map((summary) async {
-            final doctorName = await summaryRepo.getDoctorName(summary.doctorId);
+            final doctorName = await summaryRepo.getDoctorName(summary.doctorId??"");
             return SummaryWithDoctorName(
               summary: summary,
               doctorName: doctorName ?? 'Unknown Doctor',
@@ -100,7 +122,15 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
           doctorId: event.doctorId ?? '',
           filePath: event.localFilePath!,
         );
-        emit(state.copyWith(isLoadingTranscription: false, summaryText: result.summaryText, followUpQuestions: result.followUpQuestions));
+        emit(state.copyWith(isLoadingTranscription: false, summaryModel: SummaryModel(
+            title: 'Visit Summary',
+            recordingPath: event.localFilePath,
+            createdAt: Timestamp.now(),
+            uploadStatus: 'pending',
+          summaryText: result.summaryText,
+          followUpQuestions: result.followUpQuestions,
+          doctorName: event.doctorName,
+        )));
       } catch (e) {
         emit(state.copyWith(
           isLoadingTranscription: false,
@@ -118,15 +148,15 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
           emit(state.copyWith(isLoadingTranscription: false, errorMessage: 'Summary not found'));
           return;
         }
+        if(summary.doctorId != null && summary.doctorId!.isNotEmpty) {
+        final doctorName = await summaryRepo.getDoctorName(summary.doctorId??"");
         emit(state.copyWith(
             isLoadingTranscription: false,
-            summaryText: summary.summaryText ?? '',
-            followUpQuestions: summary.followUpQuestions,
-            recordingUrl:summary.recordingUrl,
+            summaryModel: summary.copyWith(doctorName: doctorName??"Doctor"),
           recordingStatus:summary.uploadStatus,
 
         ));
-        add(LoadAudioEvent(remoteUrl: summary.recordingUrl));
+        add(LoadAudioEvent(remoteUrl: summary.recordingUrl));}
       } catch (e) {
         emit(state.copyWith(isLoadingTranscription: false, errorMessage: e.toString()));
       }
@@ -141,16 +171,51 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
         if (event.localPath != null && File(event.localPath!).existsSync()) {
           sourcePath = event.localPath!;
         } else if (event.remoteUrl != null) {
-          // Download to temp dir
+          // Download to temp dir with progress
           final tempDir = await getTemporaryDirectory();
           final localFile = File('${tempDir.path}/downloaded_audio.mp3');
-          final response = await http.get(Uri.parse(event.remoteUrl!));
-          await localFile.writeAsBytes(response.bodyBytes);
-          sourcePath = localFile.path;
+
+          emit(state.copyWith(audioDownloadProgress: 0.0));
+
+          final client = http.Client();
+          try {
+            final request = http.Request('GET', Uri.parse(event.remoteUrl!));
+            final streamedResponse = await client.send(request);
+            final contentLength = streamedResponse.contentLength ?? 0;
+
+            final fileSink = localFile.openWrite();
+            int bytesReceived = 0;
+
+            await for (final chunk in streamedResponse.stream) {
+              if (isClosed) {
+                await fileSink.close();
+                client.close();
+                return;
+              }
+              bytesReceived += chunk.length;
+              fileSink.add(chunk);
+
+              if (contentLength > 0) {
+                final progress = bytesReceived / contentLength;
+                emit(state.copyWith(audioDownloadProgress: progress.clamp(0.0, 1.0)));
+              }
+            }
+
+            await fileSink.close();
+            sourcePath = localFile.path;
+
+            // Ensure progress shows as complete when done
+            emit(state.copyWith(audioDownloadProgress: 1.0));
+          } finally {
+            client.close();
+          }
         } else {
           throw Exception("No audio source provided");
         }
 
+        if (isClosed) {
+          return;
+        }
         await _player.setFilePath(sourcePath);
         emit(state.copyWith(
           audioLoadStatus: StateLoaded(successMessage: 'Audio loaded successfully'),
@@ -189,12 +254,44 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
       emit(state.copyWith(currentPosition: event.position));
     }
 
+    void _onPlayerStateChanged(
+        PlayerStateChanged event, Emitter<SummariesState> emit) {
+      final isPlaying = event.playerState.playing;
+      final processingState = event.playerState.processingState;
+      
+      // Update the playing state based on actual player state
+      emit(state.copyWith(isPlaying: isPlaying));
+      
+      // Handle completion - reset position when audio completes
+      if (processingState == ProcessingState.completed) {
+        emit(state.copyWith(
+          isPlaying: false,
+          currentPosition: Duration.zero,
+        ));
+      }
+    }
+
     @override
     Future<void> close() {
+      _positionSubscription?.cancel();
+      _playerStateSubscription?.cancel();
       _player.dispose();
       return super.close();
     }
 
+
+  FutureOr<void> _onShareSummary(ShareSummary event, Emitter<SummariesState> emit) async {
+    emit(state.copyWith(shareSummaryStatus: StateLoading()));
+    try {
+      final token = RootIsolateToken.instance!;
+      final pdfFile = await compute(pdfWorker, PdfParams(event.imageBytes, token));
+      await Share.shareXFiles([XFile(pdfFile.path)], text: 'Visit summary attached.');
+      emit(state.copyWith(shareSummaryStatus: StateLoaded(successMessage: 'Summary shared successfully')));
+    } catch (e) {
+      debugPrint('Error sharing summary: $e');
+      emit(state.copyWith(shareSummaryStatus: StateFailed(errorMessage: e.toString())));
+    }
+  }
 }
 
 

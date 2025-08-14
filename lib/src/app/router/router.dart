@@ -1,6 +1,6 @@
 
-import 'dart:async';
 
+import 'package:base_architecture/src/app/router/route_args.dart';
 import 'package:base_architecture/src/app/router/route_const.dart';
 import 'package:base_architecture/src/features/auth/presentation/view/onboarding_succes_page.dart';
 import 'package:base_architecture/src/features/auth/presentation/view/setup_user_page.dart';
@@ -83,7 +83,7 @@ class NavigationManager {
         name: RouteConst.homePage,
         builder: (_, _) {
         return  HomePage(
-        );        HomePage();
+        );         HomePage();
         },
       ),
       GoRoute(
@@ -126,8 +126,8 @@ class NavigationManager {
         path: RouteConst.recordingScreen,
         name: RouteConst.recordingScreen,
         builder: (context, state) {
-          final doctorId = state.extra as String?;
-          return RecordingPage(doctorId: doctorId);
+          final args = state.extra as RecordingScreenArgs?;
+          return RecordingPage(doctorId: args?.doctorId, doctorName: args?.doctorName);
         },
       ),
       GoRoute(

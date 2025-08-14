@@ -1,3 +1,4 @@
+import 'package:base_architecture/src/app/router/route_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -101,7 +102,10 @@ class _DoctorsListingPageState extends State<DoctorsListingPage> {
             },
             onDoctorTap: (doctor) {
               if (widget.selectionMode) {
-                context.pushNamed(RouteConst.recordingScreen, extra: doctor.id);
+                context.pushNamed(RouteConst.recordingScreen, extra: RecordingScreenArgs(
+                  doctorId: doctor.id,
+                  doctorName: doctor.name,
+                ));
               } else {
                 _navigateToAddDoctor(doctor: doctor);
               }

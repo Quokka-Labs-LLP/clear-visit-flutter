@@ -10,7 +10,8 @@ import '../bloc/recording/recording_bloc.dart';
 
 class RecordingPage extends StatefulWidget {
   final String? doctorId;
-  const RecordingPage({super.key, this.doctorId});
+  final String? doctorName;
+  const RecordingPage({super.key, this.doctorId,this.doctorName});
 
   @override
   State<RecordingPage> createState() => _RecordingPageState();
@@ -23,22 +24,30 @@ class _RecordingPageState extends State<RecordingPage> {
       create: (_) => RecordingBloc()..add(const RecordingInitialize()),
       child: BlocConsumer<RecordingBloc, RecordingState>(
         listener: (context, state) {
-          if (state.completedFilePath != null ) {
+          // Navigate only once after stop
+          if (state.completedFilePath != null && !state.isRecording && !(state.isPaused ?? false)) {
             context.goNamed(
               RouteConst.summaryScreen,
               extra: {
                 'filePath': state.completedFilePath,
                 'doctorId': widget.doctorId,
+                'doctorName': widget.doctorName,
               },
             );
+
+            // Tell bloc we handled navigation so filePath won't trigger again
             context.read<RecordingBloc>().add(const RecordingNavigationHandled());
           }
+
+          // Permission denied
           if (state.permissionStatus == MicPermissionStatus.denied) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Microphone permission not granted')),
             );
           }
-          if (state.errorMessage != null) {
+
+          // Show errors
+          if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.errorMessage!)),
             );
@@ -89,69 +98,90 @@ class _RecordingPageState extends State<RecordingPage> {
                     repeat: true,
                   ),
                   const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Main Record / Stop Button
-                      GestureDetector(
-                        onTap: () {
-                          final bloc = context.read<RecordingBloc>();
-                          if (isRecording) {
-                            bloc.add(const RecordingStop());
-                          } else {
-                            bloc.add(const RecordingStart());
-                          }
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: isRecording ? Colors.red : Colors.black,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            isRecording ? Icons.stop : Icons.mic,
-                            color: Colors.white,
-                            size: 40,
-                          ),
-                        ),
-                      ),
+                  BlocBuilder<RecordingBloc, RecordingState>(
+                    builder: (context, state) {
+                      final isRecording = state.isRecording ?? false;
+                      final isPaused = state.isPaused ?? false;
 
-                      // Animated pause/resume button (only visible when recording or paused)
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (Widget child, Animation<double> animation) {
-                          return ScaleTransition(scale: animation, child: child);
-                        },
-                        child: (isRecording || isPaused)
-                            ? Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
-                          child: GestureDetector(
-                            key: ValueKey<bool>(isPaused), // to trigger animation on toggle
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Start / Stop button
+                          GestureDetector(
                             onTap: () {
                               final bloc = context.read<RecordingBloc>();
-                              bloc.add(const RecordingPauseOrResume());
+                              if (isRecording || isPaused) {
+                                bloc.add(const RecordingStop());
+                              } else {
+                                bloc.add(const RecordingStart());
+                              }
                             },
-                            child: Container(
-                              width: 60,
-                              height: 60,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: 80,
+                              height: 80,
                               decoration: BoxDecoration(
-                                color: Colors.grey[800],
+                                color: (isRecording || isPaused) ? Colors.red : Colors.black,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                isPaused ? Icons.play_arrow : Icons.pause,
+                                (isRecording || isPaused) ? Icons.stop : Icons.mic,
                                 color: Colors.white,
-                                size: 30,
+                                size: 40,
                               ),
                             ),
                           ),
-                        )
-                            : const SizedBox.shrink(),
-                      ),
-                    ],
+
+                          // Pause / Resume button
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (Widget child, Animation<double> animation) {
+                              return ScaleTransition(scale: animation, child: child);
+                            },
+                            child: (isRecording || isPaused)
+                                ? Padding(
+                              padding: const EdgeInsets.only(left: 20.0),
+                              child: GestureDetector(
+                                key: ValueKey<bool>(isPaused),
+                                onTap: () {
+                                  context.read<RecordingBloc>().add(
+                                    const RecordingPauseOrResume(),
+                                  );
+                                },
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[800],
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isPaused ? Icons.play_arrow : Icons.pause,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                ),
+                              ),
+                            )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      );
+                    },
                   ),
+
+
+                  const SizedBox(height: 12),
+                  Text(
+                    _formatDuration(state.recordingDuration),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const Spacer(),
 
                   const Spacer(),
 
@@ -175,5 +205,13 @@ class _RecordingPageState extends State<RecordingPage> {
         },
       ),
     );
+
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
   }
 }

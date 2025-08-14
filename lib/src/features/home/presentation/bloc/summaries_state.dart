@@ -7,17 +7,17 @@ class SummariesState {
   final bool isLoadingMore;
   final bool hasReachedEnd;
   final bool isLoadingTranscription;
-  final String? summaryText;
-  final List<String>? followUpQuestions;
   final String? errorMessage;
   final bool isLoading;
   final bool isPlaying;
+  final SummaryModel? summaryModel;
   final Duration duration;
   final Duration currentPosition;
   final String? playingAudioError;
-  final String? recordingUrl;
   final String? recordingStatus;
   final StateStatus audioLoadStatus;
+  final StateStatus shareSummaryStatus;
+  final double audioDownloadProgress;
 
   SummariesState({
     this.summariesWithDoctorNames = const [],
@@ -27,16 +27,16 @@ class SummariesState {
     this.isLoadingMore = false,
     this.hasReachedEnd = false,
     this.isLoadingTranscription = false,
-    this.summaryText,
-    this.followUpQuestions,
+this.summaryModel,
     this.errorMessage,
     this.isLoading = false,
     this.isPlaying = false,
     this.duration = Duration.zero,
     this.currentPosition = Duration.zero,
     this.playingAudioError,
-    this.recordingUrl,
     this.recordingStatus,
+    this.shareSummaryStatus = const StateNotLoaded(),
+    this.audioDownloadProgress = 0.0,
   });
 
   SummariesState copyWith({
@@ -47,9 +47,7 @@ class SummariesState {
     bool? isLoadingMore,
     bool? hasReachedEnd,
     bool? isLoadingTranscription,
-    String? summaryText,
-    List<String>? followUpQuestions,
-    String? recordingUrl,
+    SummaryModel? summaryModel,
     String? errorMessage,
     bool? isLoading,
     bool? isPlaying,
@@ -57,6 +55,8 @@ class SummariesState {
     Duration? currentPosition,
     String? playingAudioError,
     String? recordingStatus,
+    StateStatus? shareSummaryStatus,
+    double? audioDownloadProgress,
   }) => SummariesState(
     summariesWithDoctorNames:
         summariesWithDoctorNames ?? this.summariesWithDoctorNames,
@@ -66,8 +66,6 @@ class SummariesState {
     hasReachedEnd: hasReachedEnd ?? this.hasReachedEnd,
     isLoadingTranscription:
         isLoadingTranscription ?? this.isLoadingTranscription,
-    summaryText: summaryText ?? this.summaryText,
-    followUpQuestions: followUpQuestions ?? this.followUpQuestions,
     errorMessage: errorMessage ?? this.errorMessage,
     isLoading: isLoading ?? this.isLoading,
     isPlaying: isPlaying ?? this.isPlaying,
@@ -75,7 +73,9 @@ class SummariesState {
     currentPosition: currentPosition ?? this.currentPosition,
     playingAudioError: playingAudioError ?? this.playingAudioError,
     audioLoadStatus: audioLoadStatus ?? this.audioLoadStatus,
-    recordingUrl: recordingUrl ?? this.recordingUrl,
     recordingStatus: recordingStatus ?? this.recordingStatus,
+    shareSummaryStatus: shareSummaryStatus ?? this.shareSummaryStatus,
+    summaryModel: summaryModel ?? this.summaryModel,
+    audioDownloadProgress: audioDownloadProgress ?? this.audioDownloadProgress,
   );
 }
