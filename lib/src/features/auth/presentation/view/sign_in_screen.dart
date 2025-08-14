@@ -49,8 +49,13 @@ class _SignInScreenState extends State<SignInScreen> {
         bottom: false,
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state.appleSignInStatus is StateLoaded || state.googleSignInStatus is StateLoaded) {
-              context.goNamed(RouteConst.setupProfile);
+            if (state.googleSignInStatus is StateLoaded) {
+              // If new signup (missing names previously), go onboarding success, else home
+              if (state.isNewSignup) {
+                context.goNamed(RouteConst.onboardingSuccess);
+              } else {
+                context.goNamed(RouteConst.homePage);
+              }
             }
           },
           builder: (context, state) {

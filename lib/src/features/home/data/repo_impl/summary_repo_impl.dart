@@ -205,10 +205,13 @@ class SummaryRepoImpl implements SummaryRepo {
     String? transcript;
     transcript ??= _extractTranscript(data);
 
-
     printMessage("doctorId: $doctorId");
-    if (transcript == null || transcript.isEmpty) {
-      throw Exception('Please try again, no summary generated');
+    final rawTranscript = (transcript ?? '').trim();
+    if (rawTranscript.isEmpty) {
+      throw Exception('No recording found, please try again');
+    }
+    if (!_looksLikeDoctorPatientConversation(rawTranscript)) {
+      throw Exception('No conversation recorded, please try again');
     }
     final summaryAndQuestions = await getFollowUpSummaryAndQuestions(
       transcript: transcript ?? "",
@@ -309,5 +312,14 @@ class SummaryRepoImpl implements SummaryRepo {
     } catch (_) {
       return null;
     }
+  }
+
+  bool _looksLikeDoctorPatientConversation(String transcript) {
+    final t = transcript.toLowerCase();
+    if (t.length < 40) return false;
+    final hasDoctor = t.contains('doctor') || t.contains('dr ');
+    final hasPatient = t.contains('patient');
+    final hasMedical = RegExp(r'\b(symptom|medication|dose|prescription|diagnosis|treatment|allerg|pain|blood pressure|bp|follow-up)\b').hasMatch(t);
+    return (hasDoctor && hasPatient) || (hasDoctor && hasMedical) || (hasPatient && hasMedical);
   }
 }

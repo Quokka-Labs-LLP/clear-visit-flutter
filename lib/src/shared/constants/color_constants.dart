@@ -7,4 +7,6 @@ class ColorConst {
   static const Color grey = Colors.black54;
   static const grey60 = Color(0xff75797d);
   static const Color black = Colors.black;
+  static const Color orange = Color(0xFFEF6C00);
+
 }

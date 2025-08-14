@@ -13,6 +13,7 @@ class AuthState {
   final String? name;
   final StateStatus setNameStatus;
   final StateStatus logoutStatus;
+  final bool isNewSignup;
 
   AuthState({
     this.apiCallStatus = const StateNotLoaded(),
@@ -27,6 +28,7 @@ class AuthState {
     this.googleSignInStatus = const StateNotLoaded(),
     this.setNameStatus = const StateNotLoaded(),
     this.logoutStatus = const StateNotLoaded(),
+    this.isNewSignup = false,
   });
 
   AuthState copyWith({
@@ -42,6 +44,7 @@ class AuthState {
     final String? name,
     final StateStatus? setNameStatus,
     final StateStatus? logoutStatus,
+    final bool? isNewSignup,
   }) => AuthState(
     apiCallStatus: apiCallStatus ?? this.apiCallStatus,
     sampleModel: sampleModel ?? this.sampleModel,
@@ -55,5 +58,6 @@ class AuthState {
     name: name ?? this.name,
     setNameStatus: setNameStatus ?? this.setNameStatus,
     logoutStatus: logoutStatus ?? this.logoutStatus,
+    isNewSignup: isNewSignup ?? this.isNewSignup,
   );
 }

@@ -132,10 +132,18 @@ class SummariesBloc extends Bloc<SummariesEvent, SummariesState> {
           doctorName: event.doctorName,
         )));
       } catch (e) {
-        emit(state.copyWith(
-          isLoadingTranscription: false,
-          errorMessage: e.toString(),
-        ));
+        // Map conversation/blank specific errors to one-time message
+        final message = e.toString();
+        String uiMessage = message;
+        if (message.contains('No conversation recorded') || message.contains('No recording found')) {
+          uiMessage = message.contains('No conversation recorded')
+              ? 'No conversation recorded, please try again'
+              : 'No recording found, please try again';
+        }
+        emit(state.copyWith(isLoadingTranscription: false, errorMessage: uiMessage));
+        // Clear after first display to avoid repeat snackbars
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        emit(state.copyWith(errorMessage: null));
       }
     }
 

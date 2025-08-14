@@ -14,7 +14,9 @@ part 'recording_state.dart';
 class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
   final AudioRecorder _recorder = AudioRecorder();
   StreamSubscription<RecordState>? _recordSub;
+  StreamSubscription<Amplitude>? _ampSub;
   Timer? _timer;
+  bool _speechDetected = false;
 
   RecordingBloc() : super(const RecordingState()) {
     on<RecordingInitialize>(_onInitialize);
@@ -30,14 +32,7 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
     RecordingInitialize event,
     Emitter<RecordingState> emit,
   ) async {
-    _recordSub = _recorder.onStateChanged().listen((rs) {
-      add(
-        rs == RecordState.record
-            ? const RecordingStart()
-            : const RecordingStop(),
-      );
-    });
-    // Don't emit start/stop here; only ensure permission check
+    // Ensure permission check only; do not mirror recorder internal state to bloc events
     await _onRequestPermission(const RecordingRequestPermission(), emit);
   }
 
@@ -114,6 +109,17 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
       );
       await _recorder.start(config, path: path);
       _timer?.cancel();
+      _ampSub?.cancel();
+      _speechDetected = false;
+      _ampSub = _recorder
+          .onAmplitudeChanged(const Duration(milliseconds: 300))
+          .listen((amp) {
+        // Amplitude in dBFS (negative). Values closer to 0 are louder
+        // Mark speech detected if above threshold
+        if (amp.current > -40) {
+          _speechDetected = true;
+        }
+      });
 
       emit(
         state.copyWith(
@@ -121,6 +127,7 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
           filePath: path,
           isPaused: false,
           recordingDuration: Duration.zero,
+          elapsedSeconds: 0,
         ),
       );
       _startTimer();
@@ -136,19 +143,39 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
     try {
       final path = await _recorder.stop();
       _timer?.cancel();
+      await _ampSub?.cancel();
 
       String? finalPath = path ?? state.filePath;
       if (finalPath != null) {
         final file = File(finalPath);
         if (await file.exists()) {
-          final bytes = await file.readAsBytes();
-          await compute(_writeBytesIsolate, {
-            'path': finalPath,
-            'bytes': bytes,
-          });
+          // Basic blank recording check by size
+          final fileSize = await file.length();
+          final isTooSmall = fileSize < 2000; // ~2KB threshold
+          final isBlank = !_speechDetected || isTooSmall;
+
+          if (isBlank) {
+            // Clean up and notify once
+            try { await file.delete(); } catch (_) {}
+            emit(state.copyWith(
+              isRecording: false,
+              isPaused: false,
+              errorMessage: 'Nothing is recorded, please try again',
+            ));
+            // Clear the error after showing it once
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+            emit(state.copyWith(errorMessage: null));
+            return;
+          } else {
+            final bytes = await file.readAsBytes();
+            await compute(_writeBytesIsolate, {
+              'path': finalPath,
+              'bytes': bytes,
+            });
+          }
         }
       }
-      emit(state.copyWith(isRecording: false, completedFilePath: finalPath));
+      emit(state.copyWith(isRecording: false, isPaused: false, completedFilePath: finalPath));
     } catch (e) {
       emit(state.copyWith(errorMessage: e.toString()));
     }
@@ -167,8 +194,6 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
       }
       else if (state.isPaused) {
         // Resume
-        print("Before resume: isRecording=${await _recorder.isRecording()}, isPaused=${await _recorder.isPaused()}");
-
         await _recorder.resume();
 
         // Continue timer from where it left off
@@ -192,17 +217,21 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
   }
 
   void _onRecordingTick(RecordingTick event, Emitter<RecordingState> emit) {
-    emit(
-      state.copyWith(
-        recordingDuration: state.recordingDuration + const Duration(seconds: 1),
-      ),
-    );
+    if (state.isRecording) {
+      emit(
+        state.copyWith(
+          elapsedSeconds: state.elapsedSeconds + 1,
+          recordingDuration: state.recordingDuration + const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
   @override
   Future<void> close() {
     _timer?.cancel();
     _recordSub?.cancel();
+    _ampSub?.cancel();
     _recorder.dispose();
     return super.close();
   }
@@ -210,8 +239,7 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final updatedSeconds = state.elapsedSeconds + 1;
-      emit(state.copyWith(elapsedSeconds: updatedSeconds));
+      add(const RecordingTick());
     });
   }
 }

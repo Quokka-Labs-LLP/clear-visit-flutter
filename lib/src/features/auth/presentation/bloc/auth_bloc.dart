@@ -128,17 +128,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
             final pref = serviceLocator<SharedPreferenceBaseService>();
 
-            if (userDoc.exists) {
-              await pref.setAttribute(SharedPrefKeys.isLoggedIn, true);
-              await pref.setAttribute(SharedPrefKeys.isOnboarded, true);
-            } else {
+            // Determine if names exist
+            String? firstName;
+            String? lastName;
+            bool hasNames = false;
+            final bool docExisted = userDoc.exists;
+            if (docExisted) {
+              final data = userDoc.data() as Map<String, dynamic>;
+              firstName = (data['firstName'] as String?)?.trim();
+              lastName = (data['lastName'] as String?)?.trim();
+              hasNames = (firstName != null && firstName.isNotEmpty) && (lastName != null && lastName.isNotEmpty);
+            }
+
+            if (!docExisted || !hasNames) {
+              // Derive names from displayName
+              final displayName = (user.displayName ?? '').trim();
+              final parts = displayName.split(' ');
+              firstName = parts.isNotEmpty ? parts.first : '';
+              lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+
               await usersRef.set({
-                'name': user.displayName ?? '',
+                'firstName': firstName,
+                'lastName': lastName,
                 'email': user.email,
                 'createdAt': FieldValue.serverTimestamp(),
-              });
-              await pref.setAttribute(SharedPrefKeys.isLoggedIn, true);
+              }, SetOptions(merge: true));
             }
+
+            // Treat only brand-new accounts as new signup; existing accounts go straight home
+            final isNewSignup = !docExisted;
+            await pref.setAttribute(SharedPrefKeys.isLoggedIn, true);
+            await pref.setAttribute(SharedPrefKeys.isOnboarded, !isNewSignup);
 
             // ✅ Always update other user info locally
             await pref.setAttribute(SharedPrefKeys.authId, user.uid);
@@ -149,8 +169,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             debugPrint("User signed in with Google: ${user.email}");
 
             emit(state.copyWith(
-              googleSignInStatus: StateLoaded(
-                  successMessage: 'Google Sign-In successful'),
+              googleSignInStatus: StateLoaded(successMessage: 'Google Sign-In successful'),
+              isNewSignup: isNewSignup,
             ));
           } else {
             emit(state.copyWith(

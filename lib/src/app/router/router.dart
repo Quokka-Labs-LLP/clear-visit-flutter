@@ -42,17 +42,10 @@ class NavigationManager {
         name: RouteConst.start,
         redirect: (ctx, state) async {
           final pref = serviceLocator<SharedPreferenceBaseService>();
-          bool isLoggedIn = await pref.getAttribute(SharedPrefKeys.isLoggedIn, false);
-          bool isOnboarded = await pref.getAttribute(SharedPrefKeys.isOnboarded, false);
-          if (isLoggedIn) {
-            if(isOnboarded) {
-              return RouteConst.homePage;
-            } else{
-              return RouteConst.setupProfile;
-            }
-          } else {
-            return RouteConst.loginPage;
-          }
+          final isLoggedIn = await pref.getAttribute(SharedPrefKeys.isLoggedIn, false);
+          final isOnboarded = await pref.getAttribute(SharedPrefKeys.isOnboarded, false);
+          if (!isLoggedIn) return RouteConst.loginPage;
+          return isOnboarded ? RouteConst.homePage : RouteConst.onboardingSuccess;
         },
       ),
 
@@ -82,8 +75,7 @@ class NavigationManager {
         path: RouteConst.homePage,
         name: RouteConst.homePage,
         builder: (_, _) {
-        return  HomePage(
-        );         HomePage();
+          return HomePage();
         },
       ),
       GoRoute(

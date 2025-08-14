@@ -24,8 +24,8 @@ class _RecordingPageState extends State<RecordingPage> {
       create: (_) => RecordingBloc()..add(const RecordingInitialize()),
       child: BlocConsumer<RecordingBloc, RecordingState>(
         listener: (context, state) {
-          // Navigate only once after stop
-          if (state.completedFilePath != null && !state.isRecording && !(state.isPaused ?? false)) {
+          // Navigate only once after stop, with all required extras
+          if (state.completedFilePath != null) {
             context.goNamed(
               RouteConst.summaryScreen,
               extra: {
@@ -55,7 +55,7 @@ class _RecordingPageState extends State<RecordingPage> {
         },
         builder: (context, state) {
           final isRecording = state.isRecording;
-          final isPaused = state.isPaused ?? false;
+          final isPaused = state.isPaused;
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
@@ -100,8 +100,8 @@ class _RecordingPageState extends State<RecordingPage> {
                   const Spacer(),
                   BlocBuilder<RecordingBloc, RecordingState>(
                     builder: (context, state) {
-                      final isRecording = state.isRecording ?? false;
-                      final isPaused = state.isPaused ?? false;
+                      final isRecording = state.isRecording;
+                      final isPaused = state.isPaused;
 
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.center,
