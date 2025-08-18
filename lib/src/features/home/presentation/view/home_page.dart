@@ -8,6 +8,8 @@ import '../../../../shared/utilities/responsive _constants.dart';
 
 import '../../../../services/service_locator.dart';
 import '../bloc/summaries_bloc.dart';
+import '../bloc/trial/trial_bloc.dart';
+import 'widgets/practice_trial_banner.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +30,9 @@ class _HomePageState extends State<HomePage> {
       providers: [
         BlocProvider(
           create: (_) => SummariesBloc()..add(const FetchSummariesEvent()),
+        ),
+        BlocProvider(
+          create: (_) => TrialBloc()..add(const CheckTrialEligibility()),
         ),
       ],
       child: Scaffold(
@@ -53,11 +58,25 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        body: _SummariesList(),
+        body: Column(
+          children: [
+            // Trial Banner
+            BlocBuilder<TrialBloc, TrialState>(
+              builder: (context, trialState) {
+                if (trialState.isEligible) {
+                  return const PracticeTrialBanner();
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            // Summaries List
+            Expanded(child: _SummariesList()),
+          ],
+        ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context.pushNamed(RouteConst.doctorsListingPage, extra: true);
+            context.pushNamed(RouteConst.doctorsListingPage, extra: {'selectionMode': true});
           },
           backgroundColor: Colors.black,
           child: const Icon(Icons.mic, color: Colors.white),

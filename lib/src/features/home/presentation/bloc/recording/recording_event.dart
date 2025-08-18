@@ -35,4 +35,8 @@ class RecordingTick extends RecordingEvent {
   const RecordingTick();
 }
 
+class RecordingStartTrial extends RecordingEvent {
+  const RecordingStartTrial();
+}
+
 

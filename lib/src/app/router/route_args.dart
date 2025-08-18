@@ -1,5 +1,6 @@
 class RecordingScreenArgs {
   final String? doctorId;
   final String? doctorName;
-  RecordingScreenArgs({this.doctorId, this.doctorName});
+  final bool isTrial;
+  RecordingScreenArgs({this.doctorId, this.doctorName, this.isTrial = false});
 }

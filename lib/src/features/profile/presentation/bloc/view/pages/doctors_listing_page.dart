@@ -13,8 +13,9 @@ import '../widgets/doctors_list_widget.dart';
 
 class DoctorsListingPage extends StatefulWidget {
   final bool selectionMode;
+  final bool isTrial;
 
-  const DoctorsListingPage({super.key, this.selectionMode = false});
+  const DoctorsListingPage({super.key, this.selectionMode = false, this.isTrial = false});
 
   @override
   State<DoctorsListingPage> createState() => _DoctorsListingPageState();
@@ -105,6 +106,7 @@ class _DoctorsListingPageState extends State<DoctorsListingPage> {
                 context.pushNamed(RouteConst.recordingScreen, extra: RecordingScreenArgs(
                   doctorId: doctor.id,
                   doctorName: doctor.name,
+                  isTrial: widget.isTrial,
                 ));
               } else {
                 _navigateToAddDoctor(doctor: doctor);

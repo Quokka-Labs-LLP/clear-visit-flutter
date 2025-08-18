@@ -44,12 +44,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-web-api-key',
-    appId: 'your-web-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project-id.firebaseapp.com',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyBP3SZMtC9yKrPS2LQqNHJKDta5NnW6bks',
+    appId: '1:520771909293:web:777d114e7fff3f9a717824',
+    messagingSenderId: '124980859440',
+    projectId: 'clearvisit-dcbab',
+    authDomain: 'clearvisit-dcbab.firebaseapp.com',
+    storageBucket: 'clearvisit-dcbab.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -71,12 +71,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'your-macos-api-key',
-    appId: 'your-macos-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
-    iosClientId: 'your-macos-client-id',
-    iosBundleId: 'com.example.clearvisit',
+    apiKey: 'AIzaSyD-fm55EZ4uaBQoXeecYft5j5qVQ6_jezQ',
+    appId: '1:124980859440:macos:a1dd20bfdeb759902013f5',
+    messagingSenderId: '124980859440',
+    projectId: 'clearvisit-dcbab',
+    storageBucket: 'clearvisit-dcbab.firebasestorage.app',
+    iosClientId: '124980859440-93hlikit5q9a25ffbjhcas3utf1rm6fq.apps.googleusercontent.com',
+    iosBundleId: 'com.clearvisit.app',
   );
 } 

@@ -10,6 +10,7 @@ import '../features/auth/domain/repo/auth_repo.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/home/data/repo_impl/summary_repo_impl.dart';
 import '../features/home/domain/repo/summary_repo.dart';
+import '../features/home/services/trial_service.dart';
 import '../features/profile/data/repo_impl/profile_repo_impl.dart';
 import '../features/profile/domain/repo/profile_repo.dart';
 import '../shared_pref_services/shared_pref_base_service.dart';
@@ -26,6 +27,7 @@ Future<void> init() async {
   serviceLocator.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   serviceLocator.registerLazySingleton<ProfileRepo>(() => ProfileRepoImpl());
   serviceLocator.registerLazySingleton<SummaryRepo>(() => SummaryRepoImpl());
+  serviceLocator.registerLazySingleton<TrialService>(() => TrialService());
   serviceLocator.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   serviceLocator.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
   serviceLocator.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);

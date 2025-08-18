@@ -92,10 +92,20 @@ class NavigationManager {
         path: RouteConst.doctorsListingPage,
         name: RouteConst.doctorsListingPage,
         builder: (context, state) {
-          final selectionMode = (state.extra as bool?) ?? false;
+          final extra = state.extra;
+          bool selectionMode = false;
+          bool isTrial = false;
+          
+          if (extra is bool) {
+            selectionMode = extra;
+          } else if (extra is Map<String, dynamic>) {
+            selectionMode = extra['isTrial'] == true || extra['selectionMode'] == true;
+            isTrial = extra['isTrial'] == true;
+          }
+          
           return BlocProvider<ProfileBloc>(
             create: (context) => ProfileBloc(),
-            child: DoctorsListingPage(selectionMode: selectionMode),
+            child: DoctorsListingPage(selectionMode: selectionMode, isTrial: isTrial),
           );
         },
       ),
@@ -118,7 +128,11 @@ class NavigationManager {
         name: RouteConst.recordingScreen,
         builder: (context, state) {
           final args = state.extra as RecordingScreenArgs?;
-          return RecordingPage(doctorId: args?.doctorId, doctorName: args?.doctorName);
+          return RecordingPage(
+            doctorId: args?.doctorId, 
+            doctorName: args?.doctorName,
+            isTrial: args?.isTrial ?? false,
+          );
         },
       ),
       GoRoute(

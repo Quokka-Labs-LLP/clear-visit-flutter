@@ -63,7 +63,7 @@ class AuthRepoImpl extends AuthRepo {
 
       await signIn.initialize(
         clientId: Platform.isIOS ? '124980859440-93hlikit5q9a25ffbjhcas3utf1rm6fq.apps.googleusercontent.com':null,
-        serverClientId: Platform.isIOS ? null:"",
+        serverClientId: Platform.isIOS ? null:"113312680290266458742",
       );
       // Set up authentication event listener
       final GoogleSignInAccount account = await signIn.authenticate();

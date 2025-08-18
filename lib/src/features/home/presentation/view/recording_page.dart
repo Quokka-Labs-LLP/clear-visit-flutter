@@ -11,7 +11,8 @@ import '../bloc/recording/recording_bloc.dart';
 class RecordingPage extends StatefulWidget {
   final String? doctorId;
   final String? doctorName;
-  const RecordingPage({super.key, this.doctorId,this.doctorName});
+  final bool isTrial;
+  const RecordingPage({super.key, this.doctorId, this.doctorName, this.isTrial = false});
 
   @override
   State<RecordingPage> createState() => _RecordingPageState();
@@ -113,7 +114,11 @@ class _RecordingPageState extends State<RecordingPage> {
                               if (isRecording || isPaused) {
                                 bloc.add(const RecordingStop());
                               } else {
-                                bloc.add(const RecordingStart());
+                                if (widget.isTrial) {
+                                  bloc.add(const RecordingStartTrial());
+                                } else {
+                                  bloc.add(const RecordingStart());
+                                }
                               }
                             },
                             child: AnimatedContainer(

@@ -7,21 +7,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import '../../../services/trial_service.dart';
 
 part 'recording_event.dart';
 part 'recording_state.dart';
 
 class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
   final AudioRecorder _recorder = AudioRecorder();
+  final TrialService _trialService = TrialService();
   StreamSubscription<RecordState>? _recordSub;
   StreamSubscription<Amplitude>? _ampSub;
   Timer? _timer;
+  Timer? _trialTimer;
   bool _speechDetected = false;
+  bool _isTrialMode = false;
 
   RecordingBloc() : super(const RecordingState()) {
     on<RecordingInitialize>(_onInitialize);
     on<RecordingRequestPermission>(_onRequestPermission);
     on<RecordingStart>(_onStart);
+    on<RecordingStartTrial>(_onStartTrial);
     on<RecordingStop>(_onStop);
     on<RecordingNavigationHandled>(_onNavigationHandled);
     on<RecordingPauseOrResume>(_onPauseOrResume);
@@ -85,6 +90,67 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
     await file.writeAsBytes(bytes, flush: true);
   }
 
+  Future<void> _onStartTrial(
+    RecordingStartTrial event,
+    Emitter<RecordingState> emit,
+  ) async {
+    try {
+      if (state.permissionStatus != MicPermissionStatus.granted) {
+        await _onRequestPermission(const RecordingRequestPermission(), emit);
+        if (state.permissionStatus != MicPermissionStatus.granted) {
+          return;
+        }
+      }
+
+      if (await _recorder.isRecording()) {
+        return; // already recording
+      }
+
+      final path = await _generateFilePath();
+      final config = RecordConfig(
+        encoder: AudioEncoder.aacLc,
+        bitRate: 128000,
+        sampleRate: 44100,
+      );
+      await _recorder.start(config, path: path);
+      _timer?.cancel();
+      _ampSub?.cancel();
+      _speechDetected = false;
+      _isTrialMode = true;
+      
+      _ampSub = _recorder
+          .onAmplitudeChanged(const Duration(milliseconds: 300))
+          .listen((amp) {
+        // Amplitude in dBFS (negative). Values closer to 0 are louder
+        // Mark speech detected if above threshold
+        if (amp.current > -40) {
+          _speechDetected = true;
+        }
+      });
+
+      emit(
+        state.copyWith(
+          isRecording: true,
+          filePath: path,
+          isPaused: false,
+          recordingDuration: Duration.zero,
+          elapsedSeconds: 0,
+        ),
+      );
+      _startTimer();
+      
+      // Start trial timer - auto-stop at 59 seconds
+      _trialTimer?.cancel();
+      _trialTimer = Timer(const Duration(seconds: 59), () {
+        if (_isTrialMode && state.isRecording) {
+          add(const RecordingStop());
+        }
+      });
+    } catch (e) {
+      emit(state.copyWith(errorMessage: e.toString()));
+    }
+  }
+
   Future<void> _onStart(
     RecordingStart event,
     Emitter<RecordingState> emit,
@@ -143,6 +209,7 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
     try {
       final path = await _recorder.stop();
       _timer?.cancel();
+      _trialTimer?.cancel();
       await _ampSub?.cancel();
 
       String? finalPath = path ?? state.filePath;
@@ -175,6 +242,12 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
           }
         }
       }
+      // If this was a trial recording, mark it as completed
+      if (_isTrialMode) {
+        await _trialService.markTrialCompleted();
+        _isTrialMode = false;
+      }
+      
       emit(state.copyWith(isRecording: false, isPaused: false, completedFilePath: finalPath));
     } catch (e) {
       emit(state.copyWith(errorMessage: e.toString()));
@@ -230,6 +303,7 @@ class RecordingBloc extends Bloc<RecordingEvent, RecordingState> {
   @override
   Future<void> close() {
     _timer?.cancel();
+    _trialTimer?.cancel();
     _recordSub?.cancel();
     _ampSub?.cancel();
     _recorder.dispose();
