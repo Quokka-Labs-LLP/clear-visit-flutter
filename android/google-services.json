@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "124980859440",
+    "project_id": "clearvisit-dcbab",
+    "storage_bucket": "clearvisit-dcbab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124980859440:android:5b8d380dbfccf82b2013f5",
+        "android_client_info": {
+          "package_name": "com.clearvisit.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124980859440-5p2q3709gq7a3n2foo5v55surabttaot.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlklFT1OLvMSqacOaS1IOmjtdMjYX4j24"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124980859440-5p2q3709gq7a3n2foo5v55surabttaot.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "124980859440-93hlikit5q9a25ffbjhcas3utf1rm6fq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.clearvisit.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

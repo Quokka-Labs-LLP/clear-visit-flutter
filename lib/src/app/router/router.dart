@@ -67,8 +67,7 @@ class NavigationManager {
         path: RouteConst.setupProfile,
         name: RouteConst.setupProfile,
         builder: (context, state) {
-          final isOnboarding = state.extra as bool? ?? true;
-          return SetupUserPage(isOnboarding: isOnboarding);
+          return SetupUserPage(isOnboarding: false);
         },
       ),
       GoRoute(

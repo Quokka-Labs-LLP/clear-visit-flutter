@@ -11,7 +11,7 @@ class AuthState {
   final StateStatus appleSignInStatus;
   final StateStatus googleSignInStatus;
   final String? name;
-  final StateStatus setNameStatus;
+   StateStatus setNameStatus;
   final StateStatus logoutStatus;
   final bool isNewSignup;
 

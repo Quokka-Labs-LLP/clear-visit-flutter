@@ -56,11 +56,9 @@ class _SetupUserPageState extends State<SetupUserPage> {
               debugPrint('Setting name in controller: ${state.name}');
             }
             if (state.setNameStatus is StateLoaded) {
-              if (widget.isOnboarding) {
-                context.goNamed(RouteConst.onboardingSuccess);
-              } else {
                 context.pop(true);
-              }
+                state.setNameStatus = StateNotLoaded();
+
             } else if (state.setNameStatus is StateFailed) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
