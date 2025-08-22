@@ -1,12 +1,17 @@
+import 'package:base_architecture/src/shared/constants/image_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_const.dart';
+import '../../../../shared/constants/color_constants.dart';
+import '../../../../shared/constants/string_constants.dart';
+import '../../../../shared/constants/text_style_constants.dart';
 import '../../../../shared/utilities/event_status.dart';
 import '../../../../shared/utilities/responsive _constants.dart';
 
 import '../../../../services/service_locator.dart';
+import '../../../../shared/widgets/common_button.dart';
 import '../bloc/summaries_bloc.dart';
 import '../bloc/trial/trial_bloc.dart';
 import 'widgets/practice_trial_banner.dart';
@@ -75,17 +80,6 @@ class _HomePageState extends State<HomePage> {
             Expanded(child: _SummariesList()),
           ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 20.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              context.pushNamed(RouteConst.doctorsListingPage, extra: {'selectionMode': true});
-            },
-            backgroundColor: Colors.black,
-            child: const Icon(Icons.mic, color: Colors.white),
-          ),
-        ),
       ),
     );
   }
@@ -140,15 +134,64 @@ class _SummariesListState extends State<_SummariesList> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.note_alt_outlined,
-                  size: 72,
-                  color: Colors.grey[400],
+                Container(
+                  width: rpHeight(context, 100),
+                  height: rpHeight(context, 100),
+                  decoration: const BoxDecoration(
+                    color: ColorConst.lightGrey,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      ImageConst.noSummariesPlaceholder,
+                      height: rpHeight(context, 60),
+                      width: rpHeight(context, 60),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'No summaries yet',
-                  style: TextStyle(color: Colors.black54),
+                SizedBox(height: rpHeight(context, 17)),
+                // App name
+                Text(
+                  StringConst.noConsultationYet,
+                  textAlign: TextAlign.center,
+                  style: TextStyleConst.headlineSmallBold.copyWith(
+                    color: ColorConst.black,
+                    fontSize: rpHeight(context, 24),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: rpHeight(context, 8)),
+                SizedBox(
+                  width: rpWidth(context, 300),
+                  child: Text(
+                    StringConst.noSummariesDescription,
+                    textAlign: TextAlign.center,
+                    style: TextStyleConst.headlineSmallMedium.copyWith(
+                      color: ColorConst.black,
+                      fontSize: rpHeight(context, 12),
+                    ),
+                  ),
+                ),
+                SizedBox(height: rpHeight(context, 40)),
+                CommonButton(
+                  onTap: () {
+                    context.pushNamed(
+                      RouteConst.doctorsListingPage,
+                      extra: {'selectionMode': true},
+                    );
+                  },
+                  btnText: StringConst.continueWithApple,
+                  backgroundColor: ColorConst.primaryBlue,
+                  fontColor: ColorConst.white,
+                  width: rpWidth(context, 351),
+                  height: rpHeight(context, 56),
+                  prefixIcon: Icon(
+                    Icons.mic,
+                    size: rpHeight(context, 24),
+                    color: ColorConst.white,
+                  ),
+                  fontSize: rpHeight(context, 16),
                 ),
               ],
             ),

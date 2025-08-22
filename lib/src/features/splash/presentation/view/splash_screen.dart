@@ -1,8 +1,10 @@
 import 'package:base_architecture/src/shared/constants/color_constants.dart';
 import 'package:base_architecture/src/shared/constants/image_constants.dart';
+import 'package:base_architecture/src/shared/constants/string_constants.dart';
+import 'package:base_architecture/src/shared/constants/text_style_constants.dart';
+import 'package:base_architecture/src/shared/utilities/responsive _constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../app/router/route_const.dart';
 
@@ -14,14 +16,10 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  String _version = '';
-
   @override
   void initState() {
     super.initState();
-    _loadVersion();
     _navigateAfterDelay();
-
   }
 
   void _navigateAfterDelay() async {
@@ -31,61 +29,65 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  Future<void> _loadVersion() async {
-    final info = await PackageInfo.fromPlatform();
-    setState(() {
-      _version = 'v${info.version} (${info.buildNumber})';
-    });
-  }
-
-  void _onPressStart() {
-    context.goNamed(RouteConst.loginPage);
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 50),
-        child: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-
-              Padding(
-                padding: const EdgeInsets.only(top: 100),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
+      backgroundColor: ColorConst.primaryBlue,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(color: ColorConst.primaryBlue),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: rpWidth(context, 12)),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Logo container with circular background
+                Container(
+                  width: rpHeight(context, 100),
+                  height: rpHeight(context, 100),
+                  decoration: const BoxDecoration(
+                    color: ColorConst.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Image.asset(
                       ImageConst.splashName,
-                      height: 210,
-                      fit: BoxFit.fitHeight,
+                      height: rpHeight(context, 60),
+                      width: rpHeight(context, 60),
+                      fit: BoxFit.contain,
                     ),
-                    SizedBox(height: 10),
-                    Text(
-                      'ClearVisit',
-                      style: TextStyle(
-                        fontSize: 60,
-                        color: ColorConst.primaryBlue,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Text(
-                      'Understand every\nconversation',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 25, color: ColorConst.grey),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: rpHeight(context, 17)),
+                // App name
+                Text(
+                  StringConst.appName,
+                  textAlign: TextAlign.center,
+                  style: TextStyleConst.headlineSmallBold.copyWith(
+                    color: ColorConst.white,
+                    fontSize: rpHeight(context, 24),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: rpHeight(context, 8)),
+                // Subtitle
+                Text(
+                  StringConst.appSubtitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyleConst.bodySmall.copyWith(
+                    color: ColorConst.white,
+                    fontSize: rpHeight(context, 12),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-
-
 }
