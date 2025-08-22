@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:firebase_core/firebase_core.dart';
-
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 import 'firebase_options.dart';
 import 'src/app/app.dart';
@@ -20,6 +20,12 @@ void main() async {
         options: DefaultFirebaseOptions.currentPlatform,
       );
       
+      // Initialize Firebase App Check
+      await FirebaseAppCheck.instance.activate(
+        // You can use debug provider for development
+        androidProvider: AndroidProvider.debug,
+        appleProvider: AppleProvider.debug,
+      );
 
       await DatabaseService.init();
       SystemChrome.setPreferredOrientations([

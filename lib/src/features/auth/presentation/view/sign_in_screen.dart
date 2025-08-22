@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'dart:io' show Platform;
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../services/service_locator.dart';
 import '../../../../shared/constants/color_constants.dart';
 import '../../../../shared/constants/image_constants.dart';
+import '../../../../shared/services/snackbar_service.dart';
 import '../../../../shared/utilities/event_status.dart';
 import '../bloc/auth_bloc.dart';
 
@@ -29,11 +31,9 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _onContinueWithApple() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Coming Soon!'),
-        duration: Duration(seconds: 2),
-      ),
+    serviceLocator<SnackBarService>().showInfo(
+      message: 'Coming Soon!',
+      duration: const Duration(seconds: 2),
     );
   }
 

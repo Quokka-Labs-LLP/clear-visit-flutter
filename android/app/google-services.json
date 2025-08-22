@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "124980859440-bpbjnl7mu9ocfm5v5t4vf471s6e887rv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.clearvisit.app",
+            "certificate_hash": "0676ed0f16170d07b85dc4463e125a195bc3e6a3"
+          }
+        },
+        {
           "client_id": "124980859440-5p2q3709gq7a3n2foo5v55surabttaot.apps.googleusercontent.com",
           "client_type": 3
         }

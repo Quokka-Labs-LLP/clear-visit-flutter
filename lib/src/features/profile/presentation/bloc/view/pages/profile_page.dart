@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../../app/router/route_const.dart';
 import '../../../../../../services/service_locator.dart';
 import '../../../../../../shared/constants/color_constants.dart';
+import '../../../../../../shared/services/snackbar_service.dart';
 import '../../../../../../shared_pref_services/shared_pref_base_service.dart';
 import '../../../../../../shared_pref_services/shared_pref_keys.dart';
 import '../../../../../auth/presentation/bloc/auth_bloc.dart';
@@ -235,27 +236,27 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSectionHeader("Account Settings"),
           _buildTile("Profile Management", Icons.manage_accounts,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Coming Soon!!')),
+            serviceLocator<SnackBarService>().showInfo(
+              message: 'Coming Soon!!',
             );
           }),
           _buildTile("Notifications", Icons.notifications,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }),
           _buildTile("Privacy Settings", Icons.lock,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }
           ),
           _buildTile("Connected Calendars", Icons.calendar_today,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }),
 
@@ -265,14 +266,14 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSectionHeader("App Actions"),
           _buildTile("Share ClearVisit for iPhone", Icons.ios_share,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }),
           _buildTile("Get ClearVisit for Desktop", Icons.computer,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }),
           _buildTile(
@@ -281,8 +282,8 @@ class _ProfilePageState extends State<ProfilePage> {
             trailing:
             const Text("SOON", style: TextStyle(color: Colors.grey)),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }
           ),
@@ -293,21 +294,21 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSectionHeader("Support"),
           _buildTile("Send Feedback", Icons.feedback,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }),
           _buildTile("Report a Bug", Icons.bug_report,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }),
           _buildTile("Help Center", Icons.help_outline,
               trailing: const Icon(Icons.open_in_new, size: 18),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon!!')),
+                serviceLocator<SnackBarService>().showInfo(
+                  message: 'Coming Soon!!',
                 );
               }),
 

@@ -51,7 +51,7 @@ class DoctorModel {
       id: id ?? this.id,
       name: name ?? this.name,
       specialization: specialization ?? this.specialization,
-      location: location ?? this.location,
+      location: location,
       patientId: patientId ?? this.patientId,
       createdAt: createdAt ?? this.createdAt,
     );

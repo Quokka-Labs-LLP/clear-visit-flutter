@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../../app/router/route_const.dart';
+import '../../../../../../services/service_locator.dart';
+import '../../../../../../shared/services/snackbar_service.dart';
 import '../../../../../../shared/utilities/event_status.dart';
 import '../../../../data/model/doctor_model.dart';
 import '../../profile_bloc.dart';
@@ -77,13 +79,8 @@ class _DoctorsListingPageState extends State<DoctorsListingPage> {
       body: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state.fetchDoctorListStatus is StateFailed) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  (state.fetchDoctorListStatus as StateFailed).errorMessage,
-                ),
-                backgroundColor: Colors.red,
-              ),
+            serviceLocator<SnackBarService>().showError(
+              message: (state.fetchDoctorListStatus as StateFailed).errorMessage,
             );
           }
         },

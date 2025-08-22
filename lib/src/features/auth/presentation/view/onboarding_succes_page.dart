@@ -1,5 +1,8 @@
 import 'package:base_architecture/src/shared/constants/color_constants.dart';
 import 'package:base_architecture/src/shared/constants/image_constants.dart';
+import 'package:base_architecture/src/shared_pref_services/shared_pref_base_service.dart';
+import 'package:base_architecture/src/shared_pref_services/shared_pref_keys.dart';
+import 'package:base_architecture/src/services/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
@@ -25,6 +28,9 @@ class _OnboardingSuccessPageState extends State<OnboardingSuccessPage>
   @override
   void initState() {
     super.initState();
+
+    // Set onboarding success in shared preferences
+    _setOnboardingSuccess();
 
     // Lottie controller for 2-second animation
     _lottieController = AnimationController(
@@ -63,6 +69,16 @@ class _OnboardingSuccessPageState extends State<OnboardingSuccessPage>
 
   void _onGetStarted() {
     context.goNamed(RouteConst.homePage);
+  }
+
+  void _setOnboardingSuccess() async {
+    try {
+      final sharedPrefService = serviceLocator<SharedPreferenceBaseService>();
+      await sharedPrefService.setAttribute(SharedPrefKeys.isOnboarded, true);
+    } catch (e) {
+      // Handle error if needed
+      debugPrint('Error setting onboarding success: $e');
+    }
   }
 
   @override

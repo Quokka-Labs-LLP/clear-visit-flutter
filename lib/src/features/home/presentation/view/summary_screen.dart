@@ -9,7 +9,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:ui' as ui;
+import '../../../../services/service_locator.dart';
 import '../../../../shared/constants/color_constants.dart';
+import '../../../../shared/services/snackbar_service.dart';
 import 'widgets/summary_content.dart';
 import 'widgets/summary_shimmer.dart';
 import 'widgets/summary_controls.dart';
@@ -67,9 +69,9 @@ class _SummaryBody extends StatelessWidget {
       body: BlocConsumer<SummariesBloc, SummariesState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+            serviceLocator<SnackBarService>().showError(
+              message: state.errorMessage!,
+            );
           }
         },
         builder: (context, state) {
@@ -90,56 +92,57 @@ class _SummaryBody extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: BlocBuilder<SummariesBloc, SummariesState>(
-        builder: (context, state) {
-          return SafeArea(
-            top: false,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: const BoxDecoration(color: Colors.white),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final double iconMainSize = constraints.maxWidth < 360 ? 42 : 48;
-                  final double iconSubSize = constraints.maxWidth < 360 ? 36 : 40;
-                  final double buttonHeight = constraints.maxWidth < 360 ? 48 : 56;
-
-                  final Widget timer = state.audioLoadStatus is StateLoading
-                      ? Shimmer.fromColors(
-                          baseColor: Colors.grey.shade300,
-                          highlightColor: Colors.grey.shade100,
-                          child: Container(
-                            width: 180,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                        )
-                      : FittedBox(
-                          child: _buildTimerText(state),
-                        );
-
-                  return SummaryControls(
-                    state: state,
-                    iconMainSize: iconMainSize,
-                    iconSubSize: iconSubSize,
-                    buttonHeight: buttonHeight,
-                    timer: timer,
-                    onShare: () async {
-                      final bytes = await captureAsImage(pdfBoundaryKey);
-                      if (context.mounted) {
-                        context.read<SummariesBloc>().add(ShareSummary(imageBytes: bytes));
-                      }
-                    },
-                    isShareLoading: state.shareSummaryStatus is StateLoading,
-                  );
-                },
-              ),
-            ),
-          );
-        },
-      ),
+      ///todo: Uncomment when SummaryControls is implemented
+      // bottomNavigationBar: BlocBuilder<SummariesBloc, SummariesState>(
+      //   builder: (context, state) {
+      //     return SafeArea(
+      //       top: false,
+      //       child: Container(
+      //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      //         decoration: const BoxDecoration(color: Colors.white),
+      //         child: LayoutBuilder(
+      //           builder: (context, constraints) {
+      //             final double iconMainSize = constraints.maxWidth < 360 ? 42 : 48;
+      //             final double iconSubSize = constraints.maxWidth < 360 ? 36 : 40;
+      //             final double buttonHeight = constraints.maxWidth < 360 ? 48 : 56;
+      //
+      //             final Widget timer = state.audioLoadStatus is StateLoading
+      //                 ? Shimmer.fromColors(
+      //                     baseColor: Colors.grey.shade300,
+      //                     highlightColor: Colors.grey.shade100,
+      //                     child: Container(
+      //                       width: 180,
+      //                       height: 22,
+      //                       decoration: BoxDecoration(
+      //                         color: Colors.white,
+      //                         borderRadius: BorderRadius.circular(6),
+      //                       ),
+      //                     ),
+      //                   )
+      //                 : FittedBox(
+      //                     child: _buildTimerText(state),
+      //                   );
+      //
+      //             return SummaryControls(
+      //               state: state,
+      //               iconMainSize: iconMainSize,
+      //               iconSubSize: iconSubSize,
+      //               buttonHeight: buttonHeight,
+      //               timer: timer,
+      //               onShare: () async {
+      //                 final bytes = await captureAsImage(pdfBoundaryKey);
+      //                 if (context.mounted) {
+      //                   context.read<SummariesBloc>().add(ShareSummary(imageBytes: bytes));
+      //                 }
+      //               },
+      //               isShareLoading: state.shareSummaryStatus is StateLoading,
+      //             );
+      //           },
+      //         ),
+      //       ),
+      //     );
+      //   },
+      // ),
     );
   }
 

@@ -64,6 +64,8 @@ class _HomePageState extends State<HomePage> {
             BlocBuilder<TrialBloc, TrialState>(
               builder: (context, trialState) {
                 if (trialState.isEligible) {
+                  return const SizedBox.shrink();
+
                   return const PracticeTrialBanner();
                 }
                 return const SizedBox.shrink();
@@ -74,12 +76,15 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            context.pushNamed(RouteConst.doctorsListingPage, extra: {'selectionMode': true});
-          },
-          backgroundColor: Colors.black,
-          child: const Icon(Icons.mic, color: Colors.white),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 20.0),
+          child: FloatingActionButton(
+            onPressed: () {
+              context.pushNamed(RouteConst.doctorsListingPage, extra: {'selectionMode': true});
+            },
+            backgroundColor: Colors.black,
+            child: const Icon(Icons.mic, color: Colors.white),
+          ),
         ),
       ),
     );
@@ -195,7 +200,7 @@ class _SummariesListState extends State<_SummariesList> {
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  height: rpHeight(context, 100),
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF7F7F7),
                     borderRadius: BorderRadius.circular(12),
@@ -203,6 +208,7 @@ class _SummariesListState extends State<_SummariesList> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         children: [
@@ -226,8 +232,6 @@ class _SummariesListState extends State<_SummariesList> {
                       if (summaryWithDoctor.summary.summaryText != null)
                         Text(
                           summaryWithDoctor.summary.summaryText!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.black,

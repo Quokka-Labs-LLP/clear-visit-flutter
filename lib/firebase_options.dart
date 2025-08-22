@@ -53,8 +53,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBP3SZMtC9yKrPS2LQqNHJKDta5NnW6bks',
-    appId: '1:520771909293:android:777d114e7fff3f9a717824',
+    apiKey: 'AIzaSyBlklFT1OLvMSqacOaS1IOmjtdMjYX4j24',
+    appId: '1:124980859440:android:5b8d380dbfccf82b2013f5',
     messagingSenderId: '124980859440',
     projectId: 'clearvisit-dcbab',
     storageBucket: 'clearvisit-dcbab.firebasestorage.app',

@@ -15,6 +15,7 @@ import '../features/profile/data/repo_impl/profile_repo_impl.dart';
 import '../features/profile/domain/repo/profile_repo.dart';
 import '../shared_pref_services/shared_pref_base_service.dart';
 import '../shared_pref_services/shared_pref_service.dart';
+import '../shared/services/snackbar_service.dart';
 import 'api_services/dio_client.dart';
 
 final serviceLocator = GetIt.instance;
@@ -32,6 +33,7 @@ Future<void> init() async {
   serviceLocator.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
   serviceLocator.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   serviceLocator.registerLazySingleton<AuthBloc>(() => AuthBloc());
+  serviceLocator.registerLazySingleton<SnackBarService>(() => SnackBarService.instance);
 }
 
 void disposeServices() {

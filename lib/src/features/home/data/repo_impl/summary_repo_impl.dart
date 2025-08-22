@@ -210,35 +210,35 @@ class SummaryRepoImpl implements SummaryRepo {
     if (rawTranscript.isEmpty) {
       throw Exception('No recording found, please try again');
     }
-    if (!_looksLikeDoctorPatientConversation(rawTranscript)) {
-      throw Exception('No conversation recorded, please try again');
-    }
+    // if (!_looksLikeDoctorPatientConversation(rawTranscript)) {
+    //   throw Exception('No conversation recorded, please try again');
+    // }
     final summaryAndQuestions = await getFollowUpSummaryAndQuestions(
       transcript: transcript ?? "",
     );
 
-    final docRef = await _firestore.collection('summary').add({
-      'patientId': patientId,
-      'doctorId': doctorId,
-      'title': 'Visit Summary',
-      'summaryText': summaryAndQuestions.first,
-      'recordingPath': filePath,
-      'recordingUrl': null,
-      'followUpQuestions': summaryAndQuestions.sublist(1, 4),
-      'createdAt': FieldValue.serverTimestamp(),
-      'uploadStatus': 'pending',
-      'uploadProgress': 0.0,
-    });
+    // final docRef = await _firestore.collection('summary').add({
+    //   'patientId': patientId,
+    //   'doctorId': doctorId,
+    //   'title': 'Visit Summary',
+    //   'summaryText': summaryAndQuestions.first,
+    //   'recordingPath': filePath,
+    //   'recordingUrl': null,
+    //   'followUpQuestions': summaryAndQuestions.sublist(1, 4),
+    //   'createdAt': FieldValue.serverTimestamp(),
+    //   'uploadStatus': 'pending',
+    //   'uploadProgress': 0.0,
+    // });
 
-    startUploadRecordingAndUpdateFirestore(
-      docId: docRef.id,
-      filePath: filePath,
-      doctorId: doctorId,
-      patientId: patientId,
-    );
+    // startUploadRecordingAndUpdateFirestore(
+    //   docId: docRef.id,
+    //   filePath: filePath,
+    //   doctorId: doctorId,
+    //   patientId: patientId,
+    // );
 
     return SummaryCreationResult(
-      documentId: docRef.id,
+      documentId: "docRef.id",
       summaryText: summaryAndQuestions.first,
       followUpQuestions: summaryAndQuestions.sublist(1, 4),
     );

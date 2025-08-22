@@ -61,6 +61,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -80,8 +82,12 @@ flutter:
     - .env.dev
 
 flutter_native_splash:
-  color: "#575990"
-  image: assets/images/splash.png
-  branding: assets/images/branding.png
+  color: "#FFFFFF"
+  image: assets/images/splash_logo.png
   android_12:
-    image: assets/images/splash.png
+    image: assets/images/splash_logo.png
+    icon_background_color: "#FFFFFF"
+  ios: true
+  android: true
+  web: false
+  fullscreen: true

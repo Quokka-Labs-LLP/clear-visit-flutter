@@ -1230,6 +1230,11 @@ PODS:
   - Firebase/Storage (12.0.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 12.0.0)
+  - firebase_app_check (0.4.0):
+    - Firebase/CoreOnly (~> 12.0.0)
+    - firebase_core
+    - FirebaseAppCheck (~> 12.0.0)
+    - Flutter
   - firebase_auth (6.0.0):
     - Firebase/Auth (= 12.0.0)
     - firebase_core
@@ -1241,6 +1246,12 @@ PODS:
     - Firebase/Storage (= 12.0.0)
     - firebase_core
     - Flutter
+  - FirebaseAppCheck (12.0.0):
+    - AppCheckCore (~> 11.0)
+    - FirebaseAppCheckInterop (~> 12.0.0)
+    - FirebaseCore (~> 12.0.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
   - FirebaseAppCheckInterop (12.0.0)
   - FirebaseAuth (12.0.0):
     - FirebaseAppCheckInterop (~> 12.0.0)
@@ -1463,6 +1474,7 @@ DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ffmpeg_kit_flutter_new (from `.symlinks/plugins/ffmpeg_kit_flutter_new/ios`)
+  - firebase_app_check (from `.symlinks/plugins/firebase_app_check/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
@@ -1487,6 +1499,7 @@ SPEC REPOS:
     - AppCheckCore
     - BoringSSL-GRPC
     - Firebase
+    - FirebaseAppCheck
     - FirebaseAppCheckInterop
     - FirebaseAuth
     - FirebaseAuthInterop
@@ -1519,6 +1532,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info_plus/ios"
   ffmpeg_kit_flutter_new:
     :path: ".symlinks/plugins/ffmpeg_kit_flutter_new/ios"
+  firebase_app_check:
+    :path: ".symlinks/plugins/firebase_app_check/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -1563,9 +1578,11 @@ SPEC CHECKSUMS:
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   ffmpeg_kit_flutter_new: 12426a19f10ac81186c67c6ebc4717f8f4364b7f
   Firebase: 800d487043c0557d9faed71477a38d9aafb08a41
+  firebase_app_check: 967c2ec2cf3d109d1ead13889994b62e3868d6d3
   firebase_auth: 5a5603bbe7fc673f88b7c652bf9c41d6c742b545
   firebase_core: 633e1851ffe1b9ab875f6467a4f574c79cef02e4
   firebase_storage: 5063abf1ea47bad3df367f24314f4cc6c61a1e16
+  FirebaseAppCheck: b91ab9185b0192dabe7efe83d4b66de33f0d83b0
   FirebaseAppCheckInterop: c848d06a04030c9858ef0ae555b82035dbe470d0
   FirebaseAuth: 654e4de84787c45d7265599a651038e854ccb439
   FirebaseAuthInterop: 002da671896af5e8879ae117dc604ed240b86e80

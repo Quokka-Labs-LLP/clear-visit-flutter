@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../../app/router/route_const.dart';
+import '../../../../services/service_locator.dart';
+import '../../../../shared/services/snackbar_service.dart';
 import '../bloc/recording/recording_bloc.dart';
 
 class RecordingPage extends StatefulWidget {
@@ -42,15 +44,15 @@ class _RecordingPageState extends State<RecordingPage> {
 
           // Permission denied
           if (state.permissionStatus == MicPermissionStatus.denied) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Microphone permission not granted')),
+            serviceLocator<SnackBarService>().showWarning(
+              message: 'Microphone permission not granted',
             );
           }
 
           // Show errors
           if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
+            serviceLocator<SnackBarService>().showError(
+              message: state.errorMessage!,
             );
           }
         },
