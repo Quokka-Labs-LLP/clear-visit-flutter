@@ -54,7 +54,7 @@ class _ProfilePageState extends State<ProfilePage> {
             topRight: Radius.circular(20),
           ),
         ),
-        padding: const EdgeInsets.all(24),
+        padding:  EdgeInsets.only(top: 24,bottom: MediaQuery.of(context).padding.bottom, left: 24, right: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -150,187 +150,190 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text(
-          'Settings',
-          style: TextStyle(
-            color: ColorConst.white,
-            fontWeight: FontWeight.bold,
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: Colors.grey[100],
+        appBar: AppBar(
+          title: const Text(
+            'Settings',
+            style: TextStyle(
+              color: ColorConst.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: Colors.black,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
-        backgroundColor: Colors.black,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: ListView(
-        children: [
-          // User Profile Section
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 36,
-                  backgroundColor: Colors.grey,
-                  child: Icon(Icons.person, size: 40, color: Colors.white),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ValueListenableBuilder<String>(
-                        valueListenable: _name,
-                        builder: (context, value, _) => Text(
-                          value,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+        body: ListView(
+          children: [
+            // User Profile Section
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 36,
+                    backgroundColor: Colors.grey,
+                    child: Icon(Icons.person, size: 40, color: Colors.white),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ValueListenableBuilder<String>(
+                          valueListenable: _name,
+                          builder: (context, value, _) => Text(
+                            value,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
-                      ),
-                      ValueListenableBuilder<String>(
-                        valueListenable: _email,
-                        builder: (context, value, _) => Text(
-                          value,
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      GestureDetector(
-                        onTap: () async {
-                          final result = await context.pushNamed<bool>(RouteConst.setupProfile, extra: false);
-                          if (result == true) {
-                            _loadUserData();
-                          }
-                        },
-                        child: const Text(
-                          'Edit Profile',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 14,
+                        ValueListenableBuilder<String>(
+                          valueListenable: _email,
+                          builder: (context, value, _) => Text(
+                            value,
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () async {
+                            final result = await context.pushNamed<bool>(RouteConst.setupProfile, extra: false);
+                            if (result == true) {
+                              _loadUserData();
+                            }
+                          },
+                          child: const Text(
+                            'Edit Profile',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Account Settings
+            _buildSectionHeader("Account Settings"),
+            _buildTile("Profile Management", Icons.manage_accounts,
+            onTap: () {
+              serviceLocator<SnackBarService>().showInfo(
+                message: 'Coming Soon!!',
+              );
+            }),
+            _buildTile("Notifications", Icons.notifications,
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }),
+            _buildTile("Privacy Settings", Icons.lock,
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }
+            ),
+            _buildTile("Connected Calendars", Icons.calendar_today,
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }),
+
+            const SizedBox(height: 12),
+
+            // App Actions
+            _buildSectionHeader("App Actions"),
+            _buildTile("Share ClearVisit for iPhone", Icons.ios_share,
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }),
+            _buildTile("Get ClearVisit for Desktop", Icons.computer,
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }),
+            _buildTile(
+              "Subscriptions",
+              Icons.subscriptions,
+              trailing:
+              const Text("SOON", style: TextStyle(color: Colors.grey)),
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }
+            ),
+
+            const SizedBox(height: 12),
+
+            // Support Options
+            _buildSectionHeader("Support"),
+            _buildTile("Send Feedback", Icons.feedback,
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }),
+            _buildTile("Report a Bug", Icons.bug_report,
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }),
+            _buildTile("Help Center", Icons.help_outline,
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () {
+                  serviceLocator<SnackBarService>().showInfo(
+                    message: 'Coming Soon!!',
+                  );
+                }),
+
+            const SizedBox(height: 12),
+            // My Doctors
+            _buildSectionHeader("My Doctors"),
+            _buildTile("My Doctors", Icons.local_hospital, onTap: () {
+              context.pushNamed(RouteConst.doctorsListingPage);
+            }),
+
+            const SizedBox(height: 12),
+
+            // Logout Section
+            _buildSectionHeader("Account"),
+            Container(
+              color: Colors.red,
+              child: ListTile(
+                leading: const Icon(Icons.logout, color: Colors.white),
+                title: const Text(
+                  'Logout',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Account Settings
-          _buildSectionHeader("Account Settings"),
-          _buildTile("Profile Management", Icons.manage_accounts,
-          onTap: () {
-            serviceLocator<SnackBarService>().showInfo(
-              message: 'Coming Soon!!',
-            );
-          }),
-          _buildTile("Notifications", Icons.notifications,
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }),
-          _buildTile("Privacy Settings", Icons.lock,
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }
-          ),
-          _buildTile("Connected Calendars", Icons.calendar_today,
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }),
-
-          const SizedBox(height: 12),
-
-          // App Actions
-          _buildSectionHeader("App Actions"),
-          _buildTile("Share ClearVisit for iPhone", Icons.ios_share,
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }),
-          _buildTile("Get ClearVisit for Desktop", Icons.computer,
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }),
-          _buildTile(
-            "Subscriptions",
-            Icons.subscriptions,
-            trailing:
-            const Text("SOON", style: TextStyle(color: Colors.grey)),
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }
-          ),
-
-          const SizedBox(height: 12),
-
-          // Support Options
-          _buildSectionHeader("Support"),
-          _buildTile("Send Feedback", Icons.feedback,
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }),
-          _buildTile("Report a Bug", Icons.bug_report,
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }),
-          _buildTile("Help Center", Icons.help_outline,
-              trailing: const Icon(Icons.open_in_new, size: 18),
-              onTap: () {
-                serviceLocator<SnackBarService>().showInfo(
-                  message: 'Coming Soon!!',
-                );
-              }),
-
-          const SizedBox(height: 12),
-          // My Doctors
-          _buildSectionHeader("My Doctors"),
-          _buildTile("My Doctors", Icons.local_hospital, onTap: () {
-            context.pushNamed(RouteConst.doctorsListingPage);
-          }),
-          
-          const SizedBox(height: 12),
-          
-          // Logout Section
-          _buildSectionHeader("Account"),
-          Container(
-            color: Colors.red,
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.white),
-              title: const Text(
-                'Logout',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                onTap: () {
+                  _showLogoutConfirmation(context);
+                },
               ),
-              onTap: () {
-                _showLogoutConfirmation(context);
-              },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -56,93 +56,96 @@ class _SummaryBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.goNamed(RouteConst.homePage),
+    return SafeArea(
+      bottom: true,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.goNamed(RouteConst.homePage),
+          ),
+          title: const Text('Summary'),
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
         ),
-        title: const Text('Summary'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
-      body: BlocConsumer<SummariesBloc, SummariesState>(
-        listener: (context, state) {
-          if (state.errorMessage != null) {
-            serviceLocator<SnackBarService>().showError(
-              message: state.errorMessage!,
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state.isLoadingTranscription) {
-            return const SummaryShimmer();
-          }
+        body: BlocConsumer<SummariesBloc, SummariesState>(
+          listener: (context, state) {
+            if (state.errorMessage != null) {
+              serviceLocator<SnackBarService>().showError(
+                message: state.errorMessage!,
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state.isLoadingTranscription) {
+              return const SummaryShimmer();
+            }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Summary container
-                SummaryContent(state: state, boundaryKey: pdfBoundaryKey),
-                const SizedBox(height: 24),
-              ],
-            ),
-          );
-        },
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Summary container
+                  SummaryContent(state: state, boundaryKey: pdfBoundaryKey),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            );
+          },
+        ),
+        ///todo: Uncomment when SummaryControls is implemented
+        // bottomNavigationBar: BlocBuilder<SummariesBloc, SummariesState>(
+        //   builder: (context, state) {
+        //     return SafeArea(
+        //       top: false,
+        //       child: Container(
+        //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        //         decoration: const BoxDecoration(color: Colors.white),
+        //         child: LayoutBuilder(
+        //           builder: (context, constraints) {
+        //             final double iconMainSize = constraints.maxWidth < 360 ? 42 : 48;
+        //             final double iconSubSize = constraints.maxWidth < 360 ? 36 : 40;
+        //             final double buttonHeight = constraints.maxWidth < 360 ? 48 : 56;
+        //
+        //             final Widget timer = state.audioLoadStatus is StateLoading
+        //                 ? Shimmer.fromColors(
+        //                     baseColor: Colors.grey.shade300,
+        //                     highlightColor: Colors.grey.shade100,
+        //                     child: Container(
+        //                       width: 180,
+        //                       height: 22,
+        //                       decoration: BoxDecoration(
+        //                         color: Colors.white,
+        //                         borderRadius: BorderRadius.circular(6),
+        //                       ),
+        //                     ),
+        //                   )
+        //                 : FittedBox(
+        //                     child: _buildTimerText(state),
+        //                   );
+        //
+        //             return SummaryControls(
+        //               state: state,
+        //               iconMainSize: iconMainSize,
+        //               iconSubSize: iconSubSize,
+        //               buttonHeight: buttonHeight,
+        //               timer: timer,
+        //               onShare: () async {
+        //                 final bytes = await captureAsImage(pdfBoundaryKey);
+        //                 if (context.mounted) {
+        //                   context.read<SummariesBloc>().add(ShareSummary(imageBytes: bytes));
+        //                 }
+        //               },
+        //               isShareLoading: state.shareSummaryStatus is StateLoading,
+        //             );
+        //           },
+        //         ),
+        //       ),
+        //     );
+        //   },
+        // ),
       ),
-      ///todo: Uncomment when SummaryControls is implemented
-      // bottomNavigationBar: BlocBuilder<SummariesBloc, SummariesState>(
-      //   builder: (context, state) {
-      //     return SafeArea(
-      //       top: false,
-      //       child: Container(
-      //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      //         decoration: const BoxDecoration(color: Colors.white),
-      //         child: LayoutBuilder(
-      //           builder: (context, constraints) {
-      //             final double iconMainSize = constraints.maxWidth < 360 ? 42 : 48;
-      //             final double iconSubSize = constraints.maxWidth < 360 ? 36 : 40;
-      //             final double buttonHeight = constraints.maxWidth < 360 ? 48 : 56;
-      //
-      //             final Widget timer = state.audioLoadStatus is StateLoading
-      //                 ? Shimmer.fromColors(
-      //                     baseColor: Colors.grey.shade300,
-      //                     highlightColor: Colors.grey.shade100,
-      //                     child: Container(
-      //                       width: 180,
-      //                       height: 22,
-      //                       decoration: BoxDecoration(
-      //                         color: Colors.white,
-      //                         borderRadius: BorderRadius.circular(6),
-      //                       ),
-      //                     ),
-      //                   )
-      //                 : FittedBox(
-      //                     child: _buildTimerText(state),
-      //                   );
-      //
-      //             return SummaryControls(
-      //               state: state,
-      //               iconMainSize: iconMainSize,
-      //               iconSubSize: iconSubSize,
-      //               buttonHeight: buttonHeight,
-      //               timer: timer,
-      //               onShare: () async {
-      //                 final bytes = await captureAsImage(pdfBoundaryKey);
-      //                 if (context.mounted) {
-      //                   context.read<SummariesBloc>().add(ShareSummary(imageBytes: bytes));
-      //                 }
-      //               },
-      //               isShareLoading: state.shareSummaryStatus is StateLoading,
-      //             );
-      //           },
-      //         ),
-      //       ),
-      //     );
-      //   },
-      // ),
     );
   }
 

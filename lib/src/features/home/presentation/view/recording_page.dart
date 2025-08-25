@@ -7,6 +7,8 @@ import 'package:lottie/lottie.dart';
 
 import '../../../../app/router/route_const.dart';
 import '../../../../services/service_locator.dart';
+import '../../../../shared/constants/color_constants.dart';
+import '../../../../shared/constants/text_style_constants.dart';
 import '../../../../shared/services/snackbar_service.dart';
 import '../bloc/recording/recording_bloc.dart';
 
@@ -62,13 +64,18 @@ class _RecordingPageState extends State<RecordingPage> {
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
-              title: const Text(
-                'Start Recording',
-                style: TextStyle(
-                  color: Color(0xFF1E3A8A),
-                  fontWeight: FontWeight.bold,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.goNamed(RouteConst.homePage),
+              ),
+              title: Text(
+                "Dr. ${widget.doctorName ?? 'Unknown'}",
+                style: TextStyleConst.bodyLarge.copyWith(
+                  fontSize: rpHeight(context, 20),
+                  color: ColorConst.black,
                 ),
               ),
+              centerTitle: true,
               backgroundColor: Colors.white,
               elevation: 0,
             ),
@@ -80,17 +87,28 @@ class _RecordingPageState extends State<RecordingPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
-                  Image.asset(
-                    ImageConst.splashName,
+                  Container(
+                    width: rpHeight(context, 100),
                     height: rpHeight(context, 100),
+                    decoration: const BoxDecoration(
+                      color: ColorConst.lightGrey,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        ImageConst.noSummariesPlaceholder,
+                        height: rpHeight(context, 60),
+                        width: rpHeight(context, 60),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Recording doctor visit...',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3A8A),
+                   Text(
+                    'Record Your Visit',
+                    style: TextStyleConst.bodyLargeBold.copyWith(
+                      fontSize: rpHeight(context, 20),
+                      color: ColorConst.black,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -198,13 +216,13 @@ class _RecordingPageState extends State<RecordingPage> {
                         ? (isPaused ? 'Tap to resume recording' : 'Tap to stop or pause recording')
                         : 'Tap to start recording'
                         : 'Microphone permission required',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
+                    style: TextStyleConst.bodyLargeMedium.copyWith(
+                      fontSize: rpHeight(context, 15),
+                      color: ColorConst.black,
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),

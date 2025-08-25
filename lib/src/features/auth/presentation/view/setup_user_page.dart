@@ -138,6 +138,7 @@ class _SetupUserPageState extends State<SetupUserPage> {
                                   errorText: null,
                                   isEnabled: true,
                                   isReadOnly: false,
+                                  maxCharacters: 50,
                                 ),
                                 const SizedBox(height: 30),
                                 BlocBuilder<AuthBloc, AuthState>(

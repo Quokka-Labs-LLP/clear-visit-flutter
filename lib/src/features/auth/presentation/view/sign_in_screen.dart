@@ -45,7 +45,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return Scaffold(
       backgroundColor: ColorConst.white,
       body: SafeArea(
-        bottom: false,
+        bottom: true,
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state.googleSignInStatus is StateLoaded) {
@@ -196,7 +196,6 @@ class _SignInScreenState extends State<SignInScreen> {
       backgroundColor: ColorConst.white,
       fontColor: ColorConst.black,
       borderColor: const Color(0xFFDADCE0),
-      isLoading: isLoading,
       height: rpHeight(context, 56),
       prefixIcon: SvgPicture.asset(
         ImageConst.googleIcon,

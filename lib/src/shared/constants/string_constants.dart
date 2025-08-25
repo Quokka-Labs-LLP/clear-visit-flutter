@@ -26,5 +26,8 @@ class StringConst {
   //placeholder
   static const String noConsultationYet = 'No Consultation yet!';
   static const String noSummariesDescription = 'Your summary list is empty. Start your first consultation recording.';
+//home page
+  static const String summaries = 'Summaries';
+  static const String recordAVisit = 'Record a Visit';
 
 }

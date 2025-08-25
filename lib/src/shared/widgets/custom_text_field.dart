@@ -11,7 +11,8 @@ class CustomTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final bool isEnabled;
   final bool isReadOnly;
-  const CustomTextField({super.key, this.controller, this.focusNode, this.hintText, required this.icon, this.errorText, this.onChanged, this.isEnabled = true, this.isReadOnly = false});
+  final int? maxCharacters;
+  const CustomTextField({super.key, this.controller, this.focusNode, this.hintText, required this.icon, this.errorText, this.onChanged, this.isEnabled = true, this.isReadOnly = false, this.maxCharacters});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class CustomTextField extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         keyboardType: TextInputType.name,
-        maxLength: 100,
+        maxLength: maxCharacters ?? 100,
         onChanged: onChanged,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(

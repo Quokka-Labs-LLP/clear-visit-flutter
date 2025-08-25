@@ -43,23 +43,22 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text(
-            'Summaries',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          title: Text(
+            StringConst.summaries,
+            style: TextStyleConst.bodyLarge.copyWith(
+              fontSize: rpHeight(context, 20),
+              color: ColorConst.black,
             ),
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.person),
+              icon: const Icon(Icons.settings,color: ColorConst.black,),
               onPressed: () {
                 context.pushNamed(RouteConst.profileScreen);
               },
             ),
           ],
-          backgroundColor: Colors.black,
+          backgroundColor: ColorConst.white,
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
@@ -181,7 +180,7 @@ class _SummariesListState extends State<_SummariesList> {
                       extra: {'selectionMode': true},
                     );
                   },
-                  btnText: StringConst.continueWithApple,
+                  btnText: StringConst.recordAVisit,
                   backgroundColor: ColorConst.primaryBlue,
                   fontColor: ColorConst.white,
                   width: rpWidth(context, 351),
